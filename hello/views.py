@@ -26,20 +26,21 @@ def index(request):
       try:
         player = row.find('td', {'class': 'player'}).find('a').text
         dp = int(row.find_all('td', {'class': 'rank'})[1].text.replace('.', ''))
-        if player in data:
-          dps = data[player]['draft_positions'].append(dp)
-          data[player] = {'draft_positions': dps, 'adp': sum(dps)/float(len(dps))}
-        else:
-          data[player] = {'draft_positions': [dp], 'adp': dp}
+        data.setdefault(player, []).append(dp)
       except:
         pass
 
+  newdata = []
+
+  for p, dps in data.iteritems():
+    adp = sum(dps) / float(len(dps))
+    newdata.append({'player': p, 'dps': dps, 'adp': adp})
+
   response = '<table><thead><tr><td>Player Name</td><td>ADP</td><td>Draft Positions</td></tr></thead><tbody>'
 
-  for player in sorted(data, key=lambda x: data[x]['adp']):
-    info = data[player]
-    d = '<tr><td>{}</td><td>{}</td><td>{}</td></tr>'.format(player, info['adp'], info['draft_positions'])
-    response += d
+  for d in sorted(newdata, key=lambda x: x['adp']):
+    row = '<tr><td>{}</td><td>{:.2f}</td><td>{}</td></tr>'.format(d['player'], d['adp'], d['dps'])
+    response += row
 
   response += '</tbody></table>'
 
