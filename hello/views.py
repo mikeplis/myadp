@@ -3,6 +3,7 @@ from django.http import HttpResponse
 import requests
 from bs4 import BeautifulSoup
 import urllib2
+import numpy
 
 from .models import Greeting
 
@@ -34,12 +35,13 @@ def index(request):
 
   for p, dps in data.iteritems():
     adp = sum(dps) / float(len(dps))
-    newdata.append({'player': p, 'dps': dps, 'adp': adp})
+    std = numpy.std(dps)
+    newdata.append({'player': p, 'dps': dps, 'adp': adp, 'std': std})
 
-  response = '<table><thead><tr><td>Player Name</td><td>ADP</td><td>Draft Positions</td></tr></thead><tbody>'
+  response = '<table><thead><tr><td>Player Name</td><td>ADP</td><td>Draft Positions</td><td>Standard Deviation</td></tr></thead><tbody>'
 
   for d in sorted(newdata, key=lambda x: x['adp']):
-    row = '<tr><td>{}</td><td>{:.2f}</td><td>{}</td></tr>'.format(d['player'], d['adp'], d['dps'])
+    row = '<tr><td>{}</td><td>{:.2f}</td><td>{}</td><td>{:.2f}</td></tr>'.format(d['player'], d['adp'], d['dps'], d['std'])
     response += row
 
   response += '</tbody></table>'
