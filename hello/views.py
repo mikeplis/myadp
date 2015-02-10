@@ -73,15 +73,18 @@ dynastyff_urls = [
 # Create your views here.
 def index(request):
   context = get_data(dlf_urls)
+  context['title'] = 'DLF February Mock Draft Results'
   return render(request, 'index.html', context)
 
 def dynastyffmixed(request):
   urls = dynastyff_urls + dlf_urls
   context = get_data(urls, [False]*len(dynastyff_urls) + [True]*len(dlf_urls))
+  context['title'] = 'DLF February and /r/DynastyFF Mock Draft Results'
   return render(request, 'index.html', context)
 
 def dynastyffonly(request):
   context = get_data(dynastyff_urls)
+  context['title'] = '/r/DynastyFF Mock Draft Results'
   return render(request, 'index.html', context)
 
 def db(request):
