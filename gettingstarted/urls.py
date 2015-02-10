@@ -11,7 +11,8 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^$', hello.views.index, name='index'),
-    url(r'^dynastyff', hello.views.dynastyff, name='dynastyff'),
+    url(r'^dynastyffonly', hello.views.dynastyffonly, name='dynastyffonly'),
+    url(r'^dynastyffmixed', hello.views.dynastyffmixed, name='dynastyffmixed'),
     url(r'^db', hello.views.db, name='db'),
     url(r'^admin/', include(admin.site.urls)),
 
