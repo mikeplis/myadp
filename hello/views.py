@@ -55,10 +55,7 @@ def get_data(urls):
   }
   return context
 
-
-# Create your views here.
-def index(request):
-  urls = [
+dlf_urls = [
     'http://football21.myfantasyleague.com/2015/options?L=46044&O=17',
     'http://football21.myfantasyleague.com/2015/options?L=26815&O=17',
     'http://football21.myfantasyleague.com/2015/options?L=38385&O=17',
@@ -66,6 +63,17 @@ def index(request):
     'http://football21.myfantasyleague.com/2015/options?L=49255&O=17',
     'http://football21.myfantasyleague.com/2015/options?L=45505&O=17'
   ]
+# Create your views here.
+def index(request):
+  context = get_data(dlf_urls)
+  return render(request, 'index.html', context)
+
+def dynastyff(request):
+  dynastyff_urls = [
+    'http://football2.myfantasyleague.com/2014/options?L=73465&O=17',
+    'http://football2.myfantasyleague.com/2014/options?L=79019&O=17'
+  ]
+  urls = dynastyff_urls + dlf_urls
   context = get_data(urls)
   return render(request, 'index.html', context)
 
