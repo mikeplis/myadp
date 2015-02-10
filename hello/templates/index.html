@@ -1,0 +1,44 @@
+<html>
+  <head>
+    <title>Live DLF Mock Results</title>
+  </head>
+  <style type="text/css">
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding: 3px;
+    }
+    td {
+      text-align: center;
+    }
+  </style>
+  <body>
+    <h1>Live DLF February Mock results</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>ADP</th>
+          <th>Standard Deviation</th>
+          {% for i in mockNums %}
+            <th><a href={{ urls|get_item:i }}>Mock #{{ i }}</a></th>
+          {% endfor %}
+        </tr>
+      </thead>
+        {% for pick in picks|dictsort:"adp" %}
+          <tr>
+            <td>{{ pick.player }}</td>
+            <td>{{ pick.adp|floatformat:2 }}</td>
+            <td>{{ pick.std|floatformat:2 }}</td>
+            {% for i in mockNums %}
+              <td>{{ pick|get_item:i }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      <tbody>
+
+      </tbody>
+    </table>
+  </body>
+</html>

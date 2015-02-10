@@ -4,8 +4,57 @@ import requests
 from bs4 import BeautifulSoup
 import urllib2
 import numpy
+from django.template.defaulttags import register
 
 from .models import Greeting
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary[key]
+
+def get_data(urls):
+  defaultPickNum = 241
+  isDraftDone = [True] * len(urls)
+  data = {}
+
+  for i, url in enumerate(urls):
+    soup = BeautifulSoup(urllib2.urlopen(url).read())
+    rows = soup.find('table', {'class': 'report'}).find_all('tr')[1:]
+    for j, row in enumerate(rows):
+      playerNode = row.find('td', {'class': 'player'})
+      if playerNode is not None:
+        player = playerNode.find('a').text
+        dp = int(row.find_all('td', {'class': 'rank'})[1].text.replace('.', ''))
+        if player in data:
+          data[player][i] = dp
+        else:
+          data[player] = {i: dp}
+      else:
+        isDraftDone[i] = False
+        break
+
+  newdata = []
+  for player, dps in data.iteritems():
+    adp = sum(dps.values()) / float(len(dps))
+    std = numpy.std(dps.values())
+    x = {'player': player, 'adp': adp, 'std': std}
+    for i in range(0, len(urls)):
+      dp = dps.get(i)
+      if dp is not None:
+        x[i] = dp
+      elif isDraftDone[i]:
+        x[i] = defaultPickNum
+      else:
+        x[i] = None
+    newdata.append(x)
+
+  context = {
+    'picks': newdata,
+    'mockNums': range(0, len(urls)),
+    'urls': urls
+  }
+  return context
+
 
 # Create your views here.
 def index(request):
@@ -17,37 +66,8 @@ def index(request):
     'http://football21.myfantasyleague.com/2015/options?L=49255&O=17',
     'http://football21.myfantasyleague.com/2015/options?L=45505&O=17'
   ]
-
-  data = {}
-
-  for url in urls:
-    soup = BeautifulSoup(urllib2.urlopen(url).read())
-    rows = soup.find('table', {'class': 'report'}).find_all('tr')
-    for row in rows:
-      try:
-        player = row.find('td', {'class': 'player'}).find('a').text
-        dp = int(row.find_all('td', {'class': 'rank'})[1].text.replace('.', ''))
-        data.setdefault(player, []).append(dp)
-      except:
-        pass
-
-  newdata = []
-
-  for p, dps in data.iteritems():
-    adp = sum(dps) / float(len(dps))
-    std = numpy.std(dps)
-    newdata.append({'player': p, 'dps': dps, 'adp': adp, 'std': std})
-
-  response = '<table><thead><tr><td>Player Name</td><td>ADP</td><td>Draft Positions</td><td>Standard Deviation</td></tr></thead><tbody>'
-
-  for d in sorted(newdata, key=lambda x: x['adp']):
-    row = '<tr><td>{}</td><td>{:.2f}</td><td>{}</td><td>{:.2f}</td></tr>'.format(d['player'], d['adp'], d['dps'], d['std'])
-    response += row
-
-  response += '</tbody></table>'
-
-  return HttpResponse(response)
-
+  context = get_data(urls)
+  return render(request, 'index.html', context)
 
 def db(request):
 
