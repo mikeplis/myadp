@@ -12,7 +12,9 @@ from .models import Greeting
 def get_item(dictionary, key):
     return dictionary[key]
 
-def get_data(urls):
+def get_data(urls, useDefault=None):
+  if useDefault is None:
+    useDefault = [True] * len(urls)
   defaultPickNum = 241
   isDraftDone = [True] * len(urls)
   data = {}
@@ -42,7 +44,7 @@ def get_data(urls):
       dp = dps.get(i)
       if dp is not None:
         x[i] = dp
-      elif isDraftDone[i]:
+      elif isDraftDone[i] and useDefault[i]:
         x[i] = defaultPickNum
       else:
         x[i] = None
@@ -74,7 +76,7 @@ def dynastyff(request):
     'http://football2.myfantasyleague.com/2014/options?L=79019&O=17'
   ]
   urls = dynastyff_urls + dlf_urls
-  context = get_data(urls)
+  context = get_data(urls, [False]*len(dynastyff_urls) + [True]*len(dlf_urls))
   return render(request, 'index.html', context)
 
 def db(request):
