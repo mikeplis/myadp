@@ -81,7 +81,7 @@ def dynastyffmixed(request):
   return render(request, 'index.html', context)
 
 def dynastyffonly(request):
-  context = get_data(dynastyff_urls, [False]*len(dynastyff_urls))
+  context = get_data(dynastyff_urls)
   return render(request, 'index.html', context)
 
 def db(request):
