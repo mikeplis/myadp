@@ -37,17 +37,23 @@ def get_data(urls, useDefault=None):
 
   newdata = []
   for player, dps in data.iteritems():
-    adp = sum(dps.values()) / float(len(dps))
-    std = numpy.std(dps.values())
-    x = {'player': player, 'adp': adp, 'std': std}
+    values = []
+    x = {}
     for i in range(0, len(urls)):
       dp = dps.get(i)
       if dp is not None:
         x[i] = dp
+        values.append(dp)
       elif isDraftDone[i] and useDefault[i]:
         x[i] = defaultPickNum
+        values.append(defaultPickNum)
       else:
         x[i] = None
+    adp = sum(values) / float(len(values))
+    std = numpy.std(values)
+    x['player'] = player
+    x['adp'] = adp
+    x['std'] = std
     newdata.append(x)
 
   context = {
