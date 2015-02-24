@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     url(r'^$', hello.views.index, name='index'),
     url(r'^dynastyffonly', hello.views.dynastyffonly, name='dynastyffonly'),
     url(r'^dynastyffmixed', hello.views.dynastyffmixed, name='dynastyffmixed'),
+    url(r'^dynastyff2qb', hello.views.dynastyff2qb, name='dynastyff2qb'),
     url(r'^db', hello.views.db, name='db'),
     url(r'^admin/', include(admin.site.urls)),
 

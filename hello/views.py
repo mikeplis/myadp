@@ -76,6 +76,14 @@ dynastyff_urls = [
   'http://football2.myfantasyleague.com/2014/options?L=73465&O=17',
   'http://football2.myfantasyleague.com/2014/options?L=79019&O=17'
 ]
+
+dynastyff_2qb_urls = [
+  'http://football2.myfantasyleague.com/2015/options?L=70578&O=17',
+  'http://football2.myfantasyleague.com/2015/options?L=65917&O=17',
+  'http://football2.myfantasyleague.com/2015/options?L=62878&O=17',
+  'http://football2.myfantasyleague.com/2015/options?L=79056&O=17'
+]
+
 # Create your views here.
 def index(request):
   context = get_data(dlf_urls)
@@ -91,6 +99,11 @@ def dynastyffmixed(request):
 def dynastyffonly(request):
   context = get_data(dynastyff_urls)
   context['title'] = '/r/DynastyFF Mock Draft Results'
+  return render(request, 'index.html', context)
+
+def dynastyff2qb(request):
+  context = get_data(dynastyff_2qb_urls)
+  context['title'] = '/r/DynastyFF 2 QB Mock Draft Results'
   return render(request, 'index.html', context)
 
 def db(request):
