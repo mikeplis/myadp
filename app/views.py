@@ -1,12 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-import requests
 from bs4 import BeautifulSoup
 import urllib2
 import numpy
 from django.template.defaulttags import register
-
-from .models import Greeting
 
 @register.filter
 def get_item(dictionary, key):
@@ -89,13 +86,3 @@ def dynastyff2qb(request):
   context = get_data(dynastyff_2qb_urls)
   context['title'] = '/r/DynastyFF 2 QB Mock Draft Results'
   return render(request, 'table.html', context)
-
-def db(request):
-
-    greeting = Greeting()
-    greeting.save()
-
-    greetings = Greeting.objects.all()
-
-    return render(request, 'db.html', {'greetings': greetings})
-
