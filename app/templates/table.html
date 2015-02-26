@@ -23,6 +23,8 @@
           <tr>
             <th class="no_order">Rank</th>
             <th>Name</th>
+            <th>Position</th>
+            <th>Team</th>
             <th>ADP</th>
             <th>Standard Deviation</th>
             {% for i in mockNums %}
@@ -34,6 +36,8 @@
             <tr>
               <td></td>
               <td>{{ pick.player }}</td>
+              <td>{{ pick.position }}</td>
+              <td>{{ pick.team }}</td>
               <td>{{ pick.adp|floatformat:2 }}</td>
               <td>{{ pick.std|floatformat:2 }}</td>
               {% for i in mockNums %}
@@ -51,7 +55,7 @@
     <script>
       $(document).ready(function() {
         var t = $('#data').DataTable({
-          "order": [[ 1, "asc" ]],
+          "order": [[ 4, "asc" ]],
           "paging": false,
           "columnDefs": [
             {"orderable": false, "targets": "no_order"}

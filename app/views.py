@@ -48,7 +48,10 @@ def get_data(urls, useDefault=None):
         x[i] = None
     adp = sum(values) / float(len(values))
     std = numpy.std(values)
-    x['player'] = player
+    p = player.rsplit(' ', 2)
+    x['player'] = p[0]
+    x['position'] = p[2]
+    x['team'] = p[1]
     x['adp'] = adp
     x['std'] = std
     newdata.append(x)
