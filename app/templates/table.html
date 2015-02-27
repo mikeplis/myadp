@@ -9,6 +9,9 @@
     div.container {
       width: 80%;
     }
+    .dataTables_filter {
+      float: left !important; 
+    }
   </style>
   <link rel="stylesheet" type="text/css" href="/static/css/jquery.dataTables.css">
   <body>
@@ -21,14 +24,14 @@
       <table id="data" class="display compact">
         <thead>
           <tr>
-            <th class="no_order">Rank</th>
+            <th>Rank</th>
             <th>Name</th>
             <th>Position</th>
             <th>Team</th>
             <th>ADP</th>
             <th>Standard Deviation</th>
             {% for i in mockNums %}
-              <th class="no_order"><a href={{ urls|get_item:i }}>Mock #{{ i }}</a></th>
+              <th><a href={{ urls|get_item:i }}>Mock #{{ i }}</a></th>
             {% endfor %}
           </tr>
         </thead>
@@ -53,13 +56,43 @@
     <script src="/static/js/jquery-1.11.1.min.js" type="text/javascript"></script>
     <script src="/static/js/jquery.dataTables.min.js" type="text/javascript"></script>
     <script>
+
+      // $.fn.dataTable.ext.search.push(
+      //   function( settings, data, dataIndex ) {
+      //     if (dataIndex == 3)
+      //       return true;
+      //   }
+      // );
+
       $(document).ready(function() {
         var t = $('#data').DataTable({
           "order": [[ 4, "asc" ]],
+          "ordering": false,
           "paging": false,
-          "columnDefs": [
-            {"orderable": false, "targets": "no_order"}
-          ]
+          initComplete: function () {
+            var api = this.api();
+            $([2, 3]).each(function(_, i) {
+              var column = api.column(i);
+              var select = $('<select><option value=""></option></select>')
+                .appendTo( $(column.header()).empty() )
+                .on('change', function() {
+                  var val = $.fn.dataTable.util.escapeRegex(
+                    $(this).val() 
+                  );
+
+                  column
+                    .search( val ? '^'+val+'$' : '', true, false )
+                    .draw();
+                });
+              column.data().unique().sort().each( function ( d, j ) {
+                  select.append( '<option value="'+d+'">'+d+'</option>' )
+              });
+            });
+        }
+        });
+
+        $('#data tbody').on( 'click', 'tr', function () {
+          $(this).toggleClass('selected');
         });
 
         t.on('order.dt search.dt', function() {
