@@ -76,6 +76,15 @@ dynastyff_2qb_urls = [
   'http://football2.myfantasyleague.com/2015/options?L=53854&O=17'
 ]
 
+dlf_urls = [
+  'http://football21.myfantasyleague.com/2015/options?L=46044&O=17',
+  'http://football21.myfantasyleague.com/2015/options?L=26815&O=17',
+  'http://football21.myfantasyleague.com/2015/options?L=38385&O=17',
+  'http://football21.myfantasyleague.com/2015/options?L=59370&O=17',
+  'http://football21.myfantasyleague.com/2015/options?L=49255&O=17',
+  'http://football21.myfantasyleague.com/2015/options?L=45505&O=17'
+]
+
 # Create your views here.
 def index(request):
   return render(request, 'index.html')
@@ -89,3 +98,9 @@ def dynastyff2qb(request):
   context = get_data(dynastyff_2qb_urls)
   context['title'] = '/r/DynastyFF 2 QB Mock Draft Results'
   return render(request, 'table.html', context)
+
+def dlf(request):
+  context = get_data(dlf_urls)
+  context['title'] = ""
+  return render(request, 'table.html', context)
+
