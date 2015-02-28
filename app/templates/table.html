@@ -3,26 +3,61 @@
     <title>Dynasty Mocks</title>
   </head>
   <style type="text/css">
-    td {
+    /*td {
       text-align: center;
     }
     div.container {
       width: 80%;
+    }*/
+    .selected {
+      background-color: #b0bed9;
     }
-    .dataTables_filter {
-      float: left !important; 
+    body {
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+    .navbar {
+      margin-bottom: 20px;
     }
   </style>
-  <link rel="stylesheet" type="text/css" href="/static/css/jquery.dataTables.css">
+  <!--<link rel="stylesheet" type="text/css" href="/static/css/jquery.dataTables.css">-->
   <link rel="stylesheet" type="text/css" href="http://cdn.datatables.net/tabletools/2.2.3/css/dataTables.tableTools.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
   <body>
-    <h1>{{ title }}</h1>
-    <ul>
-      <li><a href="/dynastyffonly">/r/DynastyFF</a></li>
-      <li><a href="/dynastyff2qb">/r/DynastyFF 2 QB</a></li>
-    </ul>
     <div class="container">
-      <table id="data" class="display compact">
+      <!-- <h1>{{ title }}</h1>
+      <ul>
+        <li><a href="/dynastyffonly">/r/DynastyFF</a></li>
+        <li><a href="/dynastyff2qb">/r/DynastyFF 2 QB</a></li>
+      </ul> -->
+      <!-- Static navbar -->
+      <nav class="navbar navbar-default">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Dynasty Mocks</a>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li><a href="/">Home</a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">ADP's <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="/dynastyffonly">/r/DynastyFF</a></li>
+                  <li><a href="/dynastyff2qb">/r/DynastyFF 2 QB</a></li>
+                </ul>
+              </li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div><!--/.container-fluid -->
+      </nav>
+      <table id="data" class="table table-condensed">
         <thead>
           <tr>
             <th>Rank</th>
@@ -58,6 +93,7 @@
     <!--<script src="/static/js/jquery.dataTables.min.js" type="text/javascript"></script> -->
     <script src="/static/js/jquery.dataTables.debug.js" type="text/javascript"></script>
     <script src="http://cdn.datatables.net/tabletools/2.2.3/js/dataTables.tableTools.min.js" type="text/javascript"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
     <script>
 
       $(document).ready(function() {
