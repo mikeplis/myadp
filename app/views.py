@@ -1,9 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from bs4 import BeautifulSoup
 import urllib2
 import numpy
 from django.template.defaulttags import register
+from django.contrib import messages
+
 
 @register.filter
 def get_item(dictionary, key):
@@ -98,6 +100,10 @@ def dynastyff2qb(request):
   context = get_data(dynastyff_2qb_urls)
   context['title'] = '/r/DynastyFF 2 QB Mock Draft Results'
   return render(request, 'table.html', context)
+
+def dynastyffmixed(request):
+  messages.add_message(request, messages.INFO, "The dynastyffmixed page has been removed")
+  return redirect('index')
 
 def dlf(request):
   context = get_data(dlf_urls)

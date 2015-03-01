@@ -39,6 +39,14 @@
           </div><!--/.nav-collapse -->
         </div><!--/.container-fluid -->
       </nav>
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-warning alert-dismissible fade in" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>{{message}}</strong>
+          </div>
+        {% endfor %}
+      {% endif %}
       <div class="jumbotron">
         <h1>Welcome to Dynasty Mocks!</h1>
         <p>Select which set of ADP's you want to view from the dropdown menu above.</p>
