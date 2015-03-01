@@ -1,82 +1,30 @@
-<html>
-  <head>
-    <title>Dynasty Mocks</title>
-  </head>
-  <style type="text/css">
-    body {
-      padding-top: 20px;
-      padding-bottom: 20px;
-    }
-    .navbar {
-      margin-bottom: 20px;
-    }
-  </style>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-  <body>
-    <div class="container">
-      <nav class="navbar navbar-default">
-        <div class="container-fluid">
-          <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-              <span class="sr-only">Toggle navigation</span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#">Dynasty Mocks</a>
-          </div>
-          <div id="navbar" class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-              <li><a class="active" href="/">Home</a></li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">ADP's <span class="caret"></span></a>
-                <ul class="dropdown-menu" role="menu">
-                  <li><a href="/dynastyffonly">/r/DynastyFF</a></li>
-                  <li><a href="/dynastyff2qb">/r/DynastyFF 2 QB</a></li>
-                </ul>
-              </li>
-            </ul>
-          </div><!--/.nav-collapse -->
-        </div><!--/.container-fluid -->
-      </nav>
-      {% if messages %}
-        {% for message in messages %}
-          <div class="alert alert-warning alert-dismissible fade in" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <strong>{{message}}</strong>
-          </div>
-        {% endfor %}
-      {% endif %}
-      <div class="jumbotron">
-        <h1>Welcome to Dynasty Mocks!</h1>
-        <p>Select which set of ADP's you want to view from the dropdown menu above.</p>
+<!-- TODO
+- set class of Home in navbar to "active" 
+-->
+{% extends "main.html" %}
+{% block content %}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-warning alert-dismissible fade in" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <strong>{{message}}</strong>
       </div>
-    <!-- Example row of columns -->
-      <div class="row">
-        <div class="col-md-6">
-          <h2>Filter by name, position, or team</h2>
-          <p>Use the search box and dropdowns at the top of each column to view only the players you want to view. You can even find all
-          rookies by selecting "FA" from the team filter.</p>
-        </div>
-        <div class="col-md-6">
-          <h2>Lock in rows by selecting them</h2>
-          <p>Select one or more rows in the table (using your Control, Shifts, and/or Command keys) to prevent them from being hidden by
-          your filters. This is useful if you want to easily compare one or more players to each other or to another set of players. For example, select a player in the table, and then select "FA" from the team filter, and then you can get an idea of where that player is valued in terms of rookie draft picks.</p>
-        </div>
-      </div>
+    {% endfor %}
+  {% endif %}
+  <div class="jumbotron">
+    <h1>Welcome to Dynasty Mocks!</h1>
+    <p>Select which set of ADP's you want to view from the dropdown menu above.</p>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2>Filter by name, position, or team</h2>
+      <p>Use the search box and dropdowns at the top of each column to view only the players you want to view. You can even find all
+      rookies by selecting "FA" from the team filter.</p>
     </div>
-    <script src="/static/js/jquery-1.11.1.min.js" type="text/javascript"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-    <script>
-      $(document).ready(function() {
-        $('#data').dataTable({
-          "order": [[ 1, "asc" ]],
-          "paging": false,
-          "columnDefs": [
-            {"orderable": false, "targets": "no_order"}
-          ]
-        });
-      } );
-    </script>
-  </body>
-</html>
+    <div class="col-md-6">
+      <h2>Lock in rows by selecting them</h2>
+      <p>Select one or more rows in the table (using your Control, Shifts, and/or Command keys) to prevent them from being hidden by
+      your filters. This is useful if you want to easily compare one or more players to each other or to another set of players. For example, select a player in the table, and then select "FA" from the team filter, and then you can get an idea of where that player is valued in terms of rookie draft picks.</p>
+    </div>
+  </div>
+{% endblock %}
