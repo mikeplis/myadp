@@ -75,7 +75,8 @@ dynastyff_2qb_urls = [
   'http://football2.myfantasyleague.com/2015/options?L=65917&O=17',
   'http://football2.myfantasyleague.com/2015/options?L=62878&O=17',
   'http://football2.myfantasyleague.com/2015/options?L=79056&O=17',
-  'http://football2.myfantasyleague.com/2015/options?L=53854&O=17'
+  'http://football2.myfantasyleague.com/2015/options?L=53854&O=17',
+  'http://football2.myfantasyleague.com/2015/options?L=66771&O=17'
 ]
 
 dlf_urls = [
