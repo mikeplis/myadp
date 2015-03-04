@@ -59,7 +59,7 @@ class DownloadedMFLSource(MFLSource):
     pass
 
   def get_data(self):
-    if (!os.path.isfile(self.filename)):
+    if (not os.path.isfile(self.filename)):
       # TODO: download page and save to file
       pass
     page = open(self.filename).read()
