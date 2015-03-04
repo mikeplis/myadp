@@ -10,10 +10,22 @@ $(document).ready(function() {
     } );
 
     var t = $('#' + tableId).DataTable({
-      "order": [[ 4, "asc" ]],
-      "ordering": false,
+      "ajax": apiUrl, // defined in table.html
       "paging": false,
+      "processing": true,
       "dom": 'T<"clear">lrtip',
+      "columnDefs": [
+        {
+          "render": function(data, type, row, meta) {
+            return data.toFixed(1);
+          },
+          "targets": [4, 5]
+        },
+        {
+          "orderable": false,
+          "targets": [1,2,3]
+        }
+      ],
       "tableTools": {
           "sSwfPath": "/static/swf/copy_csv_xls_pdf.swf",
           "sRowSelect": "os",
@@ -21,8 +33,12 @@ $(document).ready(function() {
           "sSelectedClass": "selected",
           "aButtons": []
       },
-      initComplete: function () {
+      initComplete: function (settings) {
+        // show processing indicator only when data is loading
+        $(".dataTables_processing").remove()
+
         var api = this.api();
+        api.order([4, 'asc']).draw();
         $([2, 3]).each(function(_, i) {
           var column = api.column(i);
           var select = $('<select><option value=""></option></select>')
@@ -31,7 +47,6 @@ $(document).ready(function() {
               var val = $.fn.dataTable.util.escapeRegex(
                 $(this).val() 
               );
-
               column
                 .search( val ? '^'+val+'$' : '', true, false )
                 .draw();

@@ -5,110 +5,193 @@ import urllib2
 import numpy
 from django.template.defaulttags import register
 from django.contrib import messages
+import json
+import warnings
+import csv
+import os.path
 
+class DataSource:
+  pass
 
-@register.filter
-def get_item(dictionary, key):
-    return dictionary[key]
+class MFLSource(DataSource):
 
-def get_data(urls, useDefault=None):
-  if useDefault is None:
-    useDefault = [True] * len(urls)
-  defaultPickNum = 241
-  isDraftDone = [True] * len(urls)
-  data = {}
+  def __init__(self, year, league_id):
+    self.year = year
+    self.league_id = league_id
 
-  for i, url in enumerate(urls):
-    soup = BeautifulSoup(urllib2.urlopen(url).read())
+  def get_data(self, source):
+    data = {}
+    soup = BeautifulSoup(source)
     rows = soup.find('table', {'class': 'report'}).find_all('tr')[1:]
     for j, row in enumerate(rows):
       playerNode = row.find('td', {'class': 'player'})
       if playerNode is not None:
-        player = playerNode.find('a').text
-        dp = int(row.find_all('td', {'class': 'rank'})[1].text.replace('.', ''))
-        if player in data:
-          data[player][i] = dp
-        else:
-          data[player] = {i: dp}
+        player = playerNode.find('a').text.rsplit(' ', 2)
+        d = {}
+        player_name = player[0]
+        d['position'] = player[2]
+        d['team'] = player[1]
+        # TODO: do I even need to parse out the draft_position? Can I just keep a counter of the players I view?
+        d['draft_position'] = int(row.find_all('td', {'class': 'rank'})[1].text.replace('.', ''))
+        data[player_name] = d
+    return data
+
+class LiveMFLSource(MFLSource):
+  kind = 'live_mfl'
+
+  def __init__(self, year, league_id):
+    MFLSource.__init__(self, year, league_id)
+    self.url = 'http://football.myfantasyleague.com/{}/options?L={}&O=17'.format(year, league_id)
+
+  def get_data(self):
+    page = urllib2.urlopen(self.url).read()
+    return MFLSource.get_data(self, page)
+
+class DownloadedMFLSource(MFLSource):
+  kind = 'dl_mfl'
+
+  def __init__(self, year, league_id):
+    MFLSource.__init__(self, year, league_id)
+    # TODO: use correct file path
+    self.filename = '{}_{}.html'.format(year, league_id)
+
+  def download_page():
+    pass
+
+  def get_data(self):
+    if (!os.path.isfile(self.filename)):
+      # TODO: download page and save to file
+      pass
+    page = open(self.filename).read()
+    return MFLSource.get_data(self, page)
+
+class CSVSource(DataSource):
+  kind = 'csv'
+
+  def __init__(self, filename):
+    # TODO: use correct file path
+    self.filename = filename
+
+  def get_data(self):
+    pass
+
+@register.filter
+def get_item(dictionary, key):
+  return dictionary[key]
+
+@register.filter
+def get_range(value):
+  return range(value)
+
+def combine_sources(sources):
+  data = {}
+  for i, source in enumerate(sources):
+    for player, player_data in source.get_data().iteritems():
+      if (player in data):
+        data[player]['draft_positions'].append(player_data['draft_position'])
       else:
-        isDraftDone[i] = False
-        break
+        data[player] = {}
+        data[player]['draft_positions'] = [None] * i + [player_data['draft_position']]
+        data[player]['team'] = player_data['team']
+        data[player]['position'] = player_data['position']
+    # TODO: fix this, it's inefficient
+    for player, player_data in data.iteritems():
+      if (len(player_data['draft_positions']) < i + 1):
+        data[player]['draft_positions'].append(None)
+  return data
 
-  newdata = []
-  for player, dps in data.iteritems():
-    values = []
-    x = {}
-    for i in range(0, len(urls)):
-      dp = dps.get(i)
-      if dp is not None:
-        x[i] = dp
-        values.append(dp)
-      elif isDraftDone[i] and useDefault[i]:
-        x[i] = defaultPickNum
-        values.append(defaultPickNum)
-      else:
-        x[i] = None
-    adp = sum(values) / float(len(values))
-    std = numpy.std(values)
-    p = player.rsplit(' ', 2)
-    x['player'] = p[0]
-    x['position'] = p[2]
-    x['team'] = p[1]
-    x['adp'] = adp
-    x['std'] = std
-    newdata.append(x)
+def calculate_stats(data):
+  for player, player_data in data.iteritems():
+    player_data['adp'] = numpy.mean(filter(None, player_data['draft_positions']))
+    player_data['std'] = numpy.std(filter(None, player_data['draft_positions']))
+  return data
 
-  context = {
-    'picks': newdata,
-    'mockNums': range(0, len(urls)),
-    'urls': urls
-  }
-  return context
+# TODO: probably could combine calculate_stats and convert_to_table to avoid extra passes
+def convert_to_table(data):
+  rows = []
+  for player, player_data in data.iteritems():
+    row = []
+    row.append(0) # placeholder value for Rank; gets replaced on FE
+    row.append(player)
+    row.append(player_data['position'])
+    row.append(player_data['team'])
+    row.append(player_data['adp'])
+    row.append(player_data['std'])
+    for draft_position in player_data['draft_positions']:
+      row.append(draft_position)
+    rows.append(row)
+  return rows
 
-dynastyff_urls = [
-  'http://football2.myfantasyleague.com/2014/options?L=73465&O=17',
-  'http://football2.myfantasyleague.com/2014/options?L=79019&O=17'
+dynastyff_sources = [
+  LiveMFLSource(2014, 73465),
+  LiveMFLSource(2014, 79019)
 ]
 
-dynastyff_2qb_urls = [
-  'http://football2.myfantasyleague.com/2015/options?L=70578&O=17',
-  'http://football2.myfantasyleague.com/2015/options?L=65917&O=17',
-  'http://football2.myfantasyleague.com/2015/options?L=62878&O=17',
-  'http://football2.myfantasyleague.com/2015/options?L=79056&O=17',
-  'http://football2.myfantasyleague.com/2015/options?L=53854&O=17',
-  'http://football2.myfantasyleague.com/2015/options?L=66771&O=17',
-  'http://football2.myfantasyleague.com/2015/options?L=71287&O=17'
+dynastyff_2qb_sources = [
+  LiveMFLSource(2015, 70578),
+  LiveMFLSource(2015, 65917),
+  LiveMFLSource(2015, 62878),
+  LiveMFLSource(2015, 79056),
+  LiveMFLSource(2015, 53854),
+  LiveMFLSource(2015, 66771),
+  LiveMFLSource(2015, 71287)
 ]
 
-dlf_urls = [
-  'http://football21.myfantasyleague.com/2015/options?L=46044&O=17',
-  'http://football21.myfantasyleague.com/2015/options?L=26815&O=17',
-  'http://football21.myfantasyleague.com/2015/options?L=38385&O=17',
-  'http://football21.myfantasyleague.com/2015/options?L=59370&O=17',
-  'http://football21.myfantasyleague.com/2015/options?L=49255&O=17',
-  'http://football21.myfantasyleague.com/2015/options?L=45505&O=17'
+dlf_sources = [
+  LiveMFLSource(2015, 46044),
+  LiveMFLSource(2015, 26815),
+  LiveMFLSource(2015, 38385),
+  LiveMFLSource(2015, 59370),
+  LiveMFLSource(2015, 49255),
+  LiveMFLSource(2015, 45505)
 ]
 
-# Create your views here.
 def index(request):
   return render(request, 'index.html')
 
 def dynastyffonly(request):
-  context = get_data(dynastyff_urls)
-  context['title'] = '/r/DynastyFF Mock Draft Results'
+  context = {
+    'num_mocks': len(dynastyff_sources),
+    'api_url': 'api/dynastyffonly'
+  }
   return render(request, 'table.html', context)
 
+def dynastyffonly_api(request):
+  x = convert_to_table(calculate_stats(combine_sources(dynastyff_sources)))
+  return HttpResponse(json.dumps({'data': x}), content_type="application/json")
+
 def dynastyff2qb(request):
-  context = get_data(dynastyff_2qb_urls)
-  context['title'] = '/r/DynastyFF 2 QB Mock Draft Results'
+  context = {
+    'num_mocks': len(dynastyff_2qb_sources),
+    'api_url': 'api/dynastyff2qb'
+  }
   return render(request, 'table.html', context)
+
+def dynastyff2qb_api(request):
+  x = convert_to_table(calculate_stats(combine_sources(dynastyff_2qb_sources)))
+  return HttpResponse(json.dumps({'data': x}), content_type="application/json")
+
+def dlf(request):
+  context = {
+    'num_mocks': len(dlf_sources),
+    'api_url': 'api/dlf'
+  }
+  return render(request, 'table.html', context)
+
+def dlf_api(request):
+  x = convert_to_table(calculate_stats(combine_sources(dlf_sources)))
+  return HttpResponse(json.dumps({'data': x}), content_type="application/json")
+
+
 
 def dynastyffmixed(request):
   messages.add_message(request, messages.INFO, "The dynastyffmixed page has been removed")
   return redirect('index')
 
-def dlf(request):
-  context = get_data(dlf_urls)
-  context['title'] = ""
-  return render(request, 'table.html', context)
+def test(request):
+  x = convert_to_table(calculate_stats(combine_sources(dynastyff_sources)))
+  return HttpResponse(json.dumps({'data': x}), content_type="application/json")
+
+def test2(request):
+  return render(request, 'test.html')
 

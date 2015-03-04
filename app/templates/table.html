@@ -1,6 +1,6 @@
 {% extends "main.html" %}
 {% block content %}
-<table id="data" class="table table-condensed">
+<table id="data" class="table table-condensed display">
   <thead>
     <tr>
       <th>Rank</th>
@@ -9,26 +9,13 @@
       <th>Team</th>
       <th>ADP</th>
       <th>Standard Deviation</th>
-      {% for i in mockNums %}
-        <th><a href={{ urls|get_item:i }}>Mock #{{ i }}</a></th>
+      {% for i in num_mocks|get_range %}
+        <th>Mock #{{ i }}</th>
       {% endfor %}
     </tr>
   </thead>
   <tbody>
-    {% for pick in picks|dictsort:"adp" %}
-      <tr>
-        <td></td>
-        <td>{{ pick.player }}</td>
-        <td>{{ pick.position }}</td>
-        <td>{{ pick.team }}</td>
-        <td>{{ pick.adp|floatformat:2 }}</td>
-        <td>{{ pick.std|floatformat:2 }}</td>
-        {% for i in mockNums %}
-          <td>{{ pick|get_item:i }}</td>
-        {% endfor %}
-      </tr>
-    {% endfor %}
-  </tbody>
 </table>
+<script type="text/javascript">var apiUrl = "{{ api_url|escapejs }}";</script>
 {% endblock %}
 
