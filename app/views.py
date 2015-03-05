@@ -9,6 +9,8 @@ import json
 import warnings
 import csv
 import os.path
+from django.conf import settings
+from django.templatetags.static import static
 
 class DataSource:
   pass
@@ -189,8 +191,12 @@ def dynastyffmixed(request):
   return redirect('index')
 
 def test(request):
-  x = convert_to_table(calculate_stats(combine_sources(dynastyff_sources)))
-  return HttpResponse(json.dumps({'data': x}), content_type="application/json")
+  url = os.path.join(settings.STATIC_ROOT, 'data/foobar.csv')
+  if (os.path.isfile(url)):
+    messages.add_message(request, messages.INFO, "true")
+  else:
+    messages.add_message(request, messages.INFO, url)
+  return render(request, 'index.html')
 
 def test2(request):
   return render(request, 'test.html')
