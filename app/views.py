@@ -184,18 +184,20 @@ def dlf_api(request):
   x = convert_to_table(calculate_stats(combine_sources(dlf_sources)))
   return HttpResponse(json.dumps({'data': x}), content_type="application/json")
 
-
-
 def dynastyffmixed(request):
   messages.add_message(request, messages.INFO, "The dynastyffmixed page has been removed")
   return redirect('index')
 
 def test(request):
-  url = os.path.join(settings.STATIC_ROOT, 'data/foobar.csv')
+  url = os.path.join('dynasty-mocks', 'static', 'data', 'foobar.csv')
+  url2 = os.path.join(settings.STATIC_ROOT, 'data', 'foobar.csv')
+  x = os.path.abspath(os.path.dirname(__file__))
   if (os.path.isfile(url)):
     messages.add_message(request, messages.INFO, "true")
   else:
     messages.add_message(request, messages.INFO, url)
+    messages.add_message(request, messages.INFO, url2)
+    messages.add_message(request, messages.INFO, x)
   return render(request, 'index.html')
 
 def test2(request):
