@@ -11,6 +11,7 @@ import csv
 import os.path
 from django.conf import settings
 from django.templatetags.static import static
+import logging
 
 class DataSource:
   pass
@@ -28,14 +29,18 @@ class MFLSource(DataSource):
     for j, row in enumerate(rows):
       playerNode = row.find('td', {'class': 'player'})
       if playerNode is not None:
-        player = playerNode.find('a').text.rsplit(' ', 2)
-        d = {}
-        player_name = player[0]
-        d['position'] = player[2]
-        d['team'] = player[1]
-        # TODO: do I even need to parse out the draft_position? Can I just keep a counter of the players I view?
-        d['draft_position'] = int(row.find_all('td', {'class': 'rank'})[1].text.replace('.', ''))
-        data[player_name] = d
+        try:
+          player = playerNode.find('a').text.rsplit(' ', 2)
+          d = {}
+          player_name = player[0]
+          d['position'] = player[2]
+          d['team'] = player[1]
+          # TODO: do I even need to parse out the draft_position? Can I just keep a counter of the players I view?
+          d['draft_position'] = int(row.find_all('td', {'class': 'rank'})[1].text.replace('.', ''))
+          data[player_name] = d
+        except:
+          # TODO: deal with this when calculating length of draft
+          pass
     return data
 
 class LiveMFLSource(MFLSource):
@@ -148,6 +153,14 @@ dlf_sources = [
   LiveMFLSource(2015, 45505)
 ]
 
+nasty26_sources = [
+  LiveMFLSource(2015, 71481),
+  LiveMFLSource(2015, 72926),
+  LiveMFLSource(2015, 78189),
+  LiveMFLSource(2015, 75299),
+  LiveMFLSource(2015, 76129)
+]
+
 def index(request):
   return render(request, 'index.html')
 
@@ -183,6 +196,18 @@ def dlf(request):
 def dlf_api(request):
   x = convert_to_table(calculate_stats(combine_sources(dlf_sources)))
   return HttpResponse(json.dumps({'data': x}), content_type="application/json")
+
+def nasty26(request):
+  context = {
+    'num_mocks': len(nasty26_sources),
+    'api_url': 'api/nasty26'
+  }
+  return render(request, 'table.html', context)
+
+def nasty26_api(request):
+  x = convert_to_table(calculate_stats(combine_sources(nasty26_sources)))
+  return HttpResponse(json.dumps({'data': x}), content_type="application/json")
+
 
 def dynastyffmixed(request):
   messages.add_message(request, messages.INFO, "The dynastyffmixed page has been removed")
