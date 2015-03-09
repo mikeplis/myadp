@@ -11,7 +11,13 @@ import csv
 import os.path
 from django.conf import settings
 from django.templatetags.static import static
+<<<<<<< Updated upstream
 import logging
+=======
+import csv
+
+# TODO: make class for player data
+>>>>>>> Stashed changes
 
 class DataSource:
   pass
@@ -62,13 +68,13 @@ class DownloadedMFLSource(MFLSource):
     # TODO: use correct file path
     self.filename = '{}_{}.html'.format(year, league_id)
 
+  # TODO: download page and save to file
   def download_page():
     pass
 
   def get_data(self):
     if (not os.path.isfile(self.filename)):
-      # TODO: download page and save to file
-      pass
+      download_page()
     page = open(self.filename).read()
     return MFLSource.get_data(self, page)
 
@@ -80,7 +86,13 @@ class CSVSource(DataSource):
     self.filename = filename
 
   def get_data(self):
-    pass
+    with open(os.path.join('dynasty-mocks', 'static', 'data', self.filename), 'r') as f:
+      reader = csv.reader(f)
+      rows = []
+      for row in reader:
+        
+
+
 
 @register.filter
 def get_item(dictionary, key):
@@ -216,7 +228,6 @@ def dynastyffmixed(request):
 def test(request):
   url = os.path.join('dynasty-mocks', 'static', 'data', 'foobar.csv')
   url2 = os.path.join(settings.STATIC_ROOT, 'data', 'foobar.csv')
-  x = os.path.abspath(os.path.dirname(__file__))
   if (os.path.isfile(url)):
     messages.add_message(request, messages.INFO, "true")
   else:
