@@ -129,7 +129,6 @@ dynastyff_sources = [
 
 dynastyff_2qb_sources = [
   LiveMFLSource(2015, 70578),
-  LiveMFLSource(2015, 65917),
   LiveMFLSource(2015, 62878),
   LiveMFLSource(2015, 79056),
   LiveMFLSource(2015, 53854),
