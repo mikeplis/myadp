@@ -11,13 +11,10 @@ import csv
 import os.path
 from django.conf import settings
 from django.templatetags.static import static
-<<<<<<< Updated upstream
 import logging
-=======
 import csv
 
-# TODO: make class for player data
->>>>>>> Stashed changes
+logger = logging.getLogger('testlogger')
 
 class DataSource:
   pass
@@ -86,13 +83,7 @@ class CSVSource(DataSource):
     self.filename = filename
 
   def get_data(self):
-    with open(os.path.join('dynasty-mocks', 'static', 'data', self.filename), 'r') as f:
-      reader = csv.reader(f)
-      rows = []
-      for row in reader:
-        
-
-
+    pass
 
 @register.filter
 def get_item(dictionary, key):
@@ -148,7 +139,6 @@ dynastyff_sources = [
 
 dynastyff_2qb_sources = [
   LiveMFLSource(2015, 70578),
-  LiveMFLSource(2015, 65917),
   LiveMFLSource(2015, 62878),
   LiveMFLSource(2015, 79056),
   LiveMFLSource(2015, 53854),
