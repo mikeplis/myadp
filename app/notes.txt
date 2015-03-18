@@ -1,0 +1,9 @@
+* A data source should be the results of a single draft
+* Each data source must contain:
+** The order the players are drafted in
+** Each player's name
+** Optional: Each player's team and position (will be blank if not provided)
+
+* Steps to create a report from a list of data sources:
+1) Create an empty dictionary 
+
