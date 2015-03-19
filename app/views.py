@@ -160,7 +160,8 @@ nasty26_sources = [
   LiveMFLSource(2015, 72926),
   LiveMFLSource(2015, 78189),
   LiveMFLSource(2015, 75299),
-  LiveMFLSource(2015, 76129)
+  LiveMFLSource(2015, 76129),
+  LiveMFLSource(2015, 69009),
 ]
 
 def index(request):
