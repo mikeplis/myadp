@@ -222,11 +222,11 @@ dlf_report = Report([
 ])
 
 nasty26_report = Report([
-  LiveMFLSource(2015, 71481),
-  LiveMFLSource(2015, 72926),
-  LiveMFLSource(2015, 78189),
-  LiveMFLSource(2015, 75299),
-  LiveMFLSource(2015, 76129),
+  DownloadedMFLSource(2015, 71481),
+  DownloadedMFLSource(2015, 72926),
+  DownloadedMFLSource(2015, 78189),
+  DownloadedMFLSource(2015, 75299),
+  DownloadedMFLSource(2015, 76129),
   LiveMFLSource(2015, 69009),
   LiveMFLSource(2015, 60806)
 ])
