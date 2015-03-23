@@ -22,4 +22,4 @@ urlpatterns = patterns('',
     url(r'^test$', app.views.test, name='test'),
     url(r'^test2$', app.views.test2, name='test2'),
     url(r'^admin/$', include(admin.site.urls)),
-)
+) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

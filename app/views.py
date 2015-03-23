@@ -18,13 +18,21 @@ import warnings
 
 logger = logging.getLogger('testlogger')
 
+@register.filter
+def get_item(dictionary, key):
+  return dictionary[key]
+
+@register.filter
+def get_range(value):
+  return range(value)
+
 class Report:
 
   def __init__(self, sources):
     self.sources = sources
 
   def generate(self):
-    (picks, source_lengths) = self.aggregate_picks()
+    (picks, undrafted_values) = self.aggregate_picks()
     players = {}
     for pick in picks:
       if pick.name in players:
@@ -32,18 +40,11 @@ class Report:
       else:
         player = Player(pick)
         players[pick.name] = player
-    return self.create_rows(players.values(), source_lengths)
+    return self.create_rows(players.values(), undrafted_values)
 
   def aggregate_picks(self):
     picks = []
-    # maybe rename this to undrafted_values now that it uses None for live drafts
-    # TODO: move this logic into Sources (i.e. each Source should keep track of its length)
-    #       Prereq for this is removing source_num logic from Sources
-    # IDEA: instead of each Source appending a source_num to its picks, have it append
-    #       some kind of hash, then aggregate_picks can assign the correct source_num to the picks
-    # IDEA: each Source just returns its picks, without a source_num appended to it, then this function
-    #       appends the correct source_num to the picks (simpler, but slower)
-    source_lengths = [None] * len(self.sources)
+    undrafted_values = []
     for i, source in enumerate(self.sources):
       try:
         (source_picks, is_draft_finished) = source.get_picks()
@@ -55,12 +56,12 @@ class Report:
         sp.source_num = i
       picks += source_picks
       if is_draft_finished:
-        source_lengths[i] = len(source_picks)
+        undrafted_values.append(len(source_picks))
       else:
-        source_lengths[i] = None
-    return (picks, source_lengths)
+        undrafted_values.append(None)
+    return (picks, undrafted_values)
 
-  def create_rows(self, players, source_lengths):
+  def create_rows(self, players, undrafted_values):
     rows = []
     for player in players:
       draft_positions = []
@@ -68,7 +69,7 @@ class Report:
         if source_num in player.draft_positions:
           draft_positions.append(player.draft_positions[source_num])
         else:
-          draft_positions.append(source_lengths[source_num])
+          draft_positions.append(undrafted_values[source_num])
       adp = numpy.mean(filter(None, draft_positions))
       std = numpy.std(filter(None, draft_positions))
       row = [0, player.name, player.position, player.team, adp, std] + draft_positions
@@ -103,7 +104,6 @@ class MFLSource(DataSource):
     self.year = year
     self.league_id = league_id
 
-  # TODO: remove source_num logic from Source
   # TODO: why does this function need `source` passed in?
   def get_picks(self, source):
     picks = []
@@ -142,19 +142,18 @@ class LiveMFLSource(MFLSource):
     page = urllib2.urlopen(self.url).read()
     return MFLSource.get_picks(self, page)
 
-# TODO: remove this class and have single MFLSource that downloads the page when the draft is finished
 class DownloadedMFLSource(MFLSource):
   def __init__(self, year, league_id):
     MFLSource.__init__(self, year, league_id)
     # TODO: use correct file path
-    self.filename = '{}_{}.html'.format(year, league_id)
+    self.filename = 'mfl_year-{}_league-{}.html'.format(year, league_id)
 
   # TODO: download page and save to file
   def download_page():
     pass
 
   def get_picks(self):
-    if (not os.path.isfile(self.filename)):
+    if not os.path.isfile(self.filename):
       download_page()
     page = open(self.filename).read()
     return MFLSource.get_data(self, page)
@@ -192,15 +191,6 @@ class DownloadedMFLSource(MFLSource):
 
 #   def get_data(self):
 #     pass
-
-
-@register.filter
-def get_item(dictionary, key):
-  return dictionary[key]
-
-@register.filter
-def get_range(value):
-  return range(value)
 
 dynastyff_report = Report([
   LiveMFLSource(2014, 73465),
@@ -300,8 +290,12 @@ def dynastyffmixed(request):
   return redirect('index')
 
 def test(request):
-  x = Report(dynastyff_2qb_report).generate()
-  return HttpResponse(json.dumps({'data': x}), content_type="application/json")
+  x = os.path.join(settings.BASE_DIR, 'static', 'data', 'foobar.csv')
+  if os.path.isfile(x):
+    messages.add_message(request, messages.INFO, 'true')
+  else:
+    messages.add_message(request, messages.INFO, x)
+  return render(request, 'index.html')
 
 def test2(request):
   context = {

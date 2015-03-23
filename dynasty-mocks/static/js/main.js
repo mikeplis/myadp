@@ -55,7 +55,7 @@ $(document).ready(function() {
               select.append( '<option value="'+d+'">'+d+'</option>' )
           });
         });
-    }
+      }
     });
 
     t.columns().eq(0).each( function ( colIdx ) {
