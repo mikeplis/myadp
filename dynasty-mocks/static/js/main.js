@@ -35,7 +35,7 @@ $(document).ready(function() {
       },
       initComplete: function (settings) {
         // show processing indicator only when data is loading
-        $(".dataTables_processing").remove()
+        $(".dataTables_processing").hide()
 
         var api = this.api();
         api.order([4, 'asc']).draw();
@@ -58,7 +58,7 @@ $(document).ready(function() {
     }
     });
 
-    t.columns().eq( 0 ).each( function ( colIdx ) {
+    t.columns().eq(0).each( function ( colIdx ) {
         $( 'input', t.column( colIdx ).header() ).on( 'keyup change', function () {
             t
                 .column( colIdx )

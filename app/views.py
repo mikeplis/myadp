@@ -5,107 +5,106 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.template.defaulttags import register
 from django.templatetags.static import static
-from fuzzywuzzy import fuzz, process
 import csv
 import json
 import logging
 import numpy
 import os.path
+import sys
 import urllib
 import urllib2
 import warnings
 
-logger = logging.getLogger('testlogger')
-#logger.info('This is a simple log message')
+def deprecated(func):
+  '''This is a decorator which can be used to mark functions
+  as deprecated. It will result in a warning being emitted
+  when the function is used.'''
+  def new_func(*args, **kwargs):
+    warnings.warn("Call to deprecated function {}.".format(func.__name__),
+                  category=DeprecationWarning)
+    return func(*args, **kwargs) 
+  new_func.__name__ = func.__name__
+  new_func.__doc__ = func.__doc__
+  new_func.__dict__.update(func.__dict__)
+  return new_func
 
-# TODO: pickle this so I don't have to retrieve it every time
-# def get_mfl_players():
-#   params = {'TYPE': 'players', 'JSON': 1}
-#   encoded_params = urllib.urlencode(params)
-#   mfl_url = 'http://football.myfantasyleague.com'
-#   year = 2015
-#   mfl_export_url = '{}/{}/export'.format(mfl_url, year)
-#   opener = urllib2.build_opener()
-#   url = '{}?{}'.format(mfl_export_url, encoded_params)
-#   resp = opener.open(url).read()
-#   players = json.loads(resp)['players']['player']
-#   d = {}
-#   for player in players:
-#     d[player['name']] = player
-#   return d
+logger = logging.getLogger('testlogger')
 
 class Report:
 
   def __init__(self, sources):
-    self.players = {} # map of player name (string) to Player2(?)
     self.sources = sources
-    self.source_lengths = [241] * len(sources) # 241 is default value
 
-  #def process_sources(): ???
-  def process_source(self, source):
-    """ For a single source, iterate through the picks and update players. 
+  def generate(self):
+    (picks, source_lengths) = self.aggregate_picks()
+    players = {}
+    for pick in picks:
+      if pick.name in players:
+        players[pick.name].add_pick(pick)
+      else:
+        player = Player(pick)
+        players[pick.name] = player
+    return self.create_rows(players.values(), source_lengths)
 
-    Need to also figure out length of draft and update source_lengths when finished """
-    pass
+  def aggregate_picks(self):
+    picks = []
+    # maybe rename this to undrafted_values now that it uses None for live drafts
+    # TODO: move this logic into Sources (i.e. each Source should keep track of its length)
+    #       Prereq for this is removing source_num logic from Sources
+    # IDEA: instead of each Source appending a source_num to its picks, have it append
+    #       some kind of hash, then aggregate_picks can assign the correct source_num to the picks
+    # IDEA: each Source just returns its picks, without a source_num appended to it, then this function
+    #       appends the correct source_num to the picks (simpler, but slower)
+    source_lengths = [None] * len(self.sources)
+    for i, source in enumerate(self.sources):
+      try:
+        (source_picks, is_draft_finished) = source.get_picks(i)
+      except AttributeError:
+        logger.info(sys.exc_info())
+        logger.info('problem processing source: {}'.format(source))
+        continue
+      picks += source_picks
+      if is_draft_finished:
+        source_lengths[i] = len(source_picks)
+      else:
+        source_lengths[i] = None
+    return (picks, source_lengths)
 
-  def generate():
-    """ Iterate through players and create a row for each of them """
-    # TODO: figure out the minimal amount of information needed to create a row for a player
-    #       add create a class containing that information. players will hold several instances
-    #       of this class
-    pass
-
-  def add_pick(self, player, pick_num, source_num):
-    """ Add a draft pick to a report
-
-    If player exists in players:
-      update player with new pick_num and source_num
-    Else:
-      add new entry to players with pick_num and source_num
-    """
-    pass
-
-
-class Player2:
-
-  def __init__(self, name, team, position):
-    self.name = name
-    self.team = team
-    self.position = position
-    self.draft_positions = {} # map from source_num (int) to draft_position (int)
-
-
+  def create_rows(self, players, source_lengths):
+    rows = []
+    for player in players:
+      draft_positions = []
+      for source_num in range(len(self.sources)):
+        if source_num in player.draft_positions:
+          draft_positions.append(player.draft_positions[source_num])
+        else:
+          draft_positions.append(source_lengths[source_num])
+      adp = numpy.mean(filter(None, draft_positions))
+      std = numpy.std(filter(None, draft_positions))
+      row = [0, player.name, player.position, player.team, adp, std] + draft_positions
+      rows.append(row)
+    return rows
 
 class Player:
-  #mfl_players = get_mfl_players()
-  #mfl_players_keys = mfl_players.keys()
 
-  def __init__(self, name, team=None, position=None, draft_positions=None):
+  def __init__(self, pick):
+    self.name = pick.name
+    self.team = pick.team
+    self.position = pick.position
+    self.draft_positions = {pick.source_num: pick.pick_num}
+
+  def add_pick(self, pick):
+    self.draft_positions[pick.source_num] = pick.pick_num
+
+class Pick:
+
+  def __init__(self, name, pick_num, source_num, team="", position=""):
     self.name = name
-    if team is None:
-      # get position from mfl_players
-      self.team = ""
-    else:
-      self.team = team
-    if position is None:
-      # get position from mfl_players
-      self.position = "" 
-    else:
-      self.position = position
-    if draft_positions is None:
-      self.draft_positions = []
-    else:
-      self.draft_positions = draft_positions
+    self.pick_num = pick_num
+    self.source_num = source_num
+    self.team = team
+    self.position = position
 
-  def get_adp(self):
-    return numpy.mean(filter(None, self.draft_positions))
-
-  def get_std(self):
-    return numpy.std(filter(None, self.draft_positions))
-
-  def to_row(self):
-    # placeholder value for 'Rank' in first column, which gets updated on FE
-    return [0, self.name, self.position, self.team, self.get_adp(), self.get_std()] + self.draft_positions
 
 class DataSource:
   pass
@@ -116,41 +115,48 @@ class MFLSource(DataSource):
     self.year = year
     self.league_id = league_id
 
-  def get_data(self, source):
-    data = {}
+  # TODO: remove source_num logic from Source
+  # TODO: why does this function need `source` passed in?
+  def get_picks(self, source, source_num):
+    picks = []
     soup = BeautifulSoup(source)
     rows = soup.find('table', {'class': 'report'}).find_all('tr')[1:]
-    for j, row in enumerate(rows):
-      playerNode = row.find('td', {'class': 'player'})
-      if playerNode is not None:
-        try:
-          player = playerNode.find('a').text.rsplit(' ', 2)
-          d = {}
-          player_name = player[0]
-          d['position'] = player[2]
-          d['team'] = player[1]
-          # TODO: do I even need to parse out the draft_position? Can I just keep a counter of the players I view?
-          d['draft_position'] = int(row.find_all('td', {'class': 'rank'})[1].text.replace('.', ''))
-          data[player_name] = d
-        except:
-          # TODO: deal with this when calculating length of draft
-          pass
-    return data
+    is_draft_finished = True
+    for row in rows:
+      player_data = row.find('td', {'class': 'player'})
+      if player_data is None:
+        is_draft_finished = False
+        break
+      player_name_node = player_data.find('a')
+      if player_name_node is not None:
+        player = player_name_node.text.rsplit(' ', 2)
+      else:
+        continue
+      pick_num = len(picks) + 1
+      pick = Pick(
+        name=player[0],
+        pick_num=pick_num,
+        source_num=source_num,
+        team=player[1],
+        position=player[2])
+      picks.append(pick)
+    return (picks, is_draft_finished)
 
 class LiveMFLSource(MFLSource):
-  kind = 'live_mfl'
 
   def __init__(self, year, league_id):
     MFLSource.__init__(self, year, league_id)
     self.url = 'http://football.myfantasyleague.com/{}/options?L={}&O=17'.format(year, league_id)
 
-  def get_data(self):
+  def __str__(self):
+    return 'LiveMFLSource(year={}, league_id={})'.format(self.year, self.league_id)
+
+  def get_picks(self, source_num):
     page = urllib2.urlopen(self.url).read()
-    return MFLSource.get_data(self, page)
+    return MFLSource.get_picks(self, page, source_num)
 
+# TODO: remove this class and have single MFLSource that downloads the page when the draft is finished
 class DownloadedMFLSource(MFLSource):
-  kind = 'dl_mfl'
-
   def __init__(self, year, league_id):
     MFLSource.__init__(self, year, league_id)
     # TODO: use correct file path
@@ -160,45 +166,45 @@ class DownloadedMFLSource(MFLSource):
   def download_page():
     pass
 
-  def get_data(self):
+  def get_picks(self):
     if (not os.path.isfile(self.filename)):
       download_page()
     page = open(self.filename).read()
     return MFLSource.get_data(self, page)
 
-class CSVMultiSource(DataSource):
-  """ CSV file that contains results from several drafts
+# class CSVMultiSource(DataSource):
+#   """ CSV file that contains results from several drafts
 
-  Each row in the file should contain a player name and his draft positions
-  """
-  kind = 'multi_csv'
+#   Each row in the file should contain a player name and his draft positions
+#   """
+#   kind = 'multi_csv'
 
-  def __init__(self, filename):
-    self.filename = filename
+#   def __init__(self, filename):
+#     self.filename = filename
 
-  def get_data(self):
-    with open(os.path.join('dynasty-mocks', 'static', 'data', self.filename), 'rU') as f:
-      reader = csv.reader(f)
-      rows = []
-      for row in reader:
-        draft_positions = []
-        for i, draft_position in enumerate(row[1:], start=1):
-          try:
-            draft_positions.append(int(draft_position))
-          except:
-            draft_positions.append(None)
-        player = Player(name=row[0], draft_positions=draft_positions)
-        rows.append(player.to_row())
-    return rows
+#   def get_data(self):
+#     with open(os.path.join('dynasty-mocks', 'static', 'data', self.filename), 'rU') as f:
+#       reader = csv.reader(f)
+#       rows = []
+#       for row in reader:
+#         draft_positions = []
+#         for i, draft_position in enumerate(row[1:], start=1):
+#           try:
+#             draft_positions.append(int(draft_position))
+#           except:
+#             draft_positions.append(None)
+#         player = Player(name=row[0], draft_positions=draft_positions)
+#         rows.append(player.to_row())
+#     return rows
 
-class CSVSource(DataSource):
-  kind = 'csv'
+# class CSVSource(DataSource):
+#   kind = 'csv'
 
-  def __init__(self, filename):
-    self.filename = filename
+#   def __init__(self, filename):
+#     self.filename = filename
 
-  def get_data(self):
-    pass
+#   def get_data(self):
+#     pass
 
 @register.filter
 def get_item(dictionary, key):
@@ -208,124 +214,85 @@ def get_item(dictionary, key):
 def get_range(value):
   return range(value)
 
-def combine_sources(sources):
-  data = {}
-  for i, source in enumerate(sources):
-    for player, player_data in source.get_data().iteritems():
-      if (player in data):
-        data[player]['draft_positions'].append(player_data['draft_position'])
-      else:
-        data[player] = {}
-        data[player]['draft_positions'] = [None] * i + [player_data['draft_position']]
-        data[player]['team'] = player_data['team']
-        data[player]['position'] = player_data['position']
-    # TODO: fix this, it's inefficient
-    for player, player_data in data.iteritems():
-      if (len(player_data['draft_positions']) < i + 1):
-        data[player]['draft_positions'].append(None)
-  return data
-
-def calculate_stats(data):
-  for player, player_data in data.iteritems():
-    player_data['adp'] = numpy.mean(filter(None, player_data['draft_positions']))
-    player_data['std'] = numpy.std(filter(None, player_data['draft_positions']))
-  return data
-
-# TODO: probably could combine calculate_stats and convert_to_table to avoid extra passes
-def convert_to_table(data):
-  rows = []
-  for player, player_data in data.iteritems():
-    row = []
-    row.append(0) # placeholder value for Rank; gets replaced on FE
-    row.append(player)
-    row.append(player_data['position'])
-    row.append(player_data['team'])
-    row.append(player_data['adp'])
-    row.append(player_data['std'])
-    for draft_position in player_data['draft_positions']:
-      row.append(draft_position)
-    rows.append(row)
-  return rows
-
-dynastyff_sources = [
+dynastyff_report = Report([
   LiveMFLSource(2014, 73465),
   LiveMFLSource(2014, 79019)
-]
+])
 
-dynastyff_2qb_sources = [
+dynastyff_2qb_report = Report([
   LiveMFLSource(2015, 70578),
-  LiveMFLSource(2015, 65917),
   LiveMFLSource(2015, 62878),
   LiveMFLSource(2015, 79056),
   LiveMFLSource(2015, 53854),
   LiveMFLSource(2015, 66771),
   LiveMFLSource(2015, 71287)
-]
+])
 
-dlf_sources = [
+dlf_report = Report([
   LiveMFLSource(2015, 46044),
   LiveMFLSource(2015, 26815),
   LiveMFLSource(2015, 38385),
   LiveMFLSource(2015, 59370),
   LiveMFLSource(2015, 49255),
   LiveMFLSource(2015, 45505)
-]
+])
 
-nasty26_sources = [
+nasty26_report = Report([
   LiveMFLSource(2015, 71481),
   LiveMFLSource(2015, 72926),
   LiveMFLSource(2015, 78189),
   LiveMFLSource(2015, 75299),
-  LiveMFLSource(2015, 76129)
-]
+  LiveMFLSource(2015, 76129),
+  LiveMFLSource(2015, 60806)
+])
 
-dynastyff_rookie_source = CSVMultiSource('dynasty_ff_rookie.csv')
+#dynastyff_rookie_source = CSVMultiSource('dynasty_ff_rookie.csv')
 
 def index(request):
   return render(request, 'index.html')
 
 def dynastyffonly(request):
   context = {
-    'num_mocks': len(dynastyff_sources),
+    'num_mocks': len(dynastyff_report.sources),
     'api_url': 'api/dynastyffonly'
   }
   return render(request, 'table.html', context)
 
 def dynastyffonly_api(request):
-  x = convert_to_table(calculate_stats(combine_sources(dynastyff_sources)))
+  x = dynastyff_report.generate()
   return HttpResponse(json.dumps({'data': x}), content_type="application/json")
 
 def dynastyff2qb(request):
   context = {
-    'num_mocks': len(dynastyff_2qb_sources),
+    'num_mocks': len(dynastyff_2qb_report.sources),
     'api_url': 'api/dynastyff2qb'
   }
   return render(request, 'table.html', context)
 
 def dynastyff2qb_api(request):
-  x = convert_to_table(calculate_stats(combine_sources(dynastyff_2qb_sources)))
+  x = dynastyff_2qb_report.generate()
   return HttpResponse(json.dumps({'data': x}), content_type="application/json")
 
 def dlf(request):
   context = {
-    'num_mocks': len(dlf_sources),
+    'num_mocks': len(dlf_report.sources),
     'api_url': 'api/dlf'
   }
   return render(request, 'table.html', context)
 
 def dlf_api(request):
-  x = convert_to_table(calculate_stats(combine_sources(dlf_sources)))
+  x = dlf_report.generate()
   return HttpResponse(json.dumps({'data': x}), content_type="application/json")
 
 def nasty26(request):
   context = {
-    'num_mocks': len(nasty26_sources),
+    'num_mocks': len(nasty26_report.sources),
     'api_url': 'api/nasty26'
   }
   return render(request, 'table.html', context)
 
 def nasty26_api(request):
-  x = convert_to_table(calculate_stats(combine_sources(nasty26_sources)))
+  x = nasty26_report.generate()
   return HttpResponse(json.dumps({'data': x}), content_type="application/json")
 
 def dynastyff_rookie(request):
@@ -344,9 +311,13 @@ def dynastyffmixed(request):
   return redirect('index')
 
 def test(request):
-  x = CSVMultiSource('dynasty_ff_rookie.csv').get_data()
+  x = Report(dynastyff_2qb_report).generate()
   return HttpResponse(json.dumps({'data': x}), content_type="application/json")
 
 def test2(request):
-  return render(request, 'test.html')
+  context = {
+    'num_mocks': len(dynastyff_2qb_report),
+    'api_url': 'test'
+  }
+  return render(request, 'table.html', context)
 
