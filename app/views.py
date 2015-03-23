@@ -103,6 +103,7 @@ class MFLSource(DataSource):
   def __init__(self, year, league_id):
     self.year = year
     self.league_id = league_id
+    self.url = 'http://football.myfantasyleague.com/{}/options?L={}&O=17'.format(year, league_id)
 
   # TODO: why does this function need `source` passed in?
   def get_picks(self, source):
@@ -133,7 +134,7 @@ class LiveMFLSource(MFLSource):
 
   def __init__(self, year, league_id):
     MFLSource.__init__(self, year, league_id)
-    self.url = 'http://football.myfantasyleague.com/{}/options?L={}&O=17'.format(year, league_id)
+    #self.url = 'http://football.myfantasyleague.com/{}/options?L={}&O=17'.format(year, league_id)
 
   def __str__(self):
     return 'LiveMFLSource(year={}, league_id={})'.format(self.year, self.league_id)
@@ -147,16 +148,21 @@ class DownloadedMFLSource(MFLSource):
     MFLSource.__init__(self, year, league_id)
     # TODO: use correct file path
     self.filename = 'mfl_year-{}_league-{}.html'.format(year, league_id)
+    self.full_path = os.path.join(settings.BASE_DIR, 'static', 'data', self.filename)
 
   # TODO: download page and save to file
-  def download_page():
-    pass
+  def download_page(self):
+    page = urllib2.urlopen(self.url).read()
+    with open(self.full_path, 'w') as f:
+      f.write(page)
+    return page
 
   def get_picks(self):
-    if not os.path.isfile(self.filename):
-      download_page()
-    page = open(self.filename).read()
-    return MFLSource.get_data(self, page)
+    if not os.path.isfile(self.full_path):
+      page = self.download_page()
+    else:
+      page = open(self.full_path).read()
+    return MFLSource.get_picks(self, page)
 
 # class CSVMultiSource(DataSource):
 #   """ CSV file that contains results from several drafts
@@ -207,12 +213,12 @@ dynastyff_2qb_report = Report([
 ])
 
 dlf_report = Report([
-  LiveMFLSource(2015, 46044),
-  LiveMFLSource(2015, 26815),
-  LiveMFLSource(2015, 38385),
-  LiveMFLSource(2015, 59370),
-  LiveMFLSource(2015, 49255),
-  LiveMFLSource(2015, 45505)
+  DownloadedMFLSource(2015, 46044),
+  DownloadedMFLSource(2015, 26815),
+  DownloadedMFLSource(2015, 38385),
+  DownloadedMFLSource(2015, 59370),
+  DownloadedMFLSource(2015, 49255),
+  DownloadedMFLSource(2015, 45505)
 ])
 
 nasty26_report = Report([
@@ -290,7 +296,7 @@ def dynastyffmixed(request):
   return redirect('index')
 
 def test(request):
-  x = os.path.join(settings.BASE_DIR, 'static', 'data', 'foobar.csv')
+  x = os.path.join(settings.BASE_DIR, 'assets', 'data', 'foobar.csv')
   if os.path.isfile(x):
     messages.add_message(request, messages.INFO, 'true')
   else:
