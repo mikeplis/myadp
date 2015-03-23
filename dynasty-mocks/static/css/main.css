@@ -18,7 +18,7 @@ body {
 /* taken from datatables.css to make processing indicator display correctly */
 .dataTables_processing {
   position: relative;
-  top: 10%;
+  top: 80px;
   left: 50%;
   width: 100%;
   height: 40px;

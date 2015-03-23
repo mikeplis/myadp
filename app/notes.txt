@@ -1,0 +1,77 @@
+* A data source should be the results of a single draft
+* Each data source must contain:
+** The order the players are drafted in
+** Each player's name
+** Optional: Each player's team and position (will be blank if not provided)
+
+* Steps to create JSON data for table from list of sources:
+1) Append source number to each pick and aggregate all of them into a single list
+2) Iterate through all picks, adding them to a dict of player_name to Player
+3) Iterate through all Players, creating rows for the table
+
+
+class Report:
+
+  def __init__(self, sources):
+    self.players = {}
+    process_sources(sources)
+
+  def process_sources(self, sources):
+    for i, source in enumerate(sources):
+      process_source(source)
+
+  def process_source(self, source):
+
+
+class Source:
+
+  def process(players):
+    for row in rows:
+      if row.player in players:
+        players[row.player].add_pick(row.draft_position)
+
+class Player:
+
+  def add_pick
+
+
+-----------------
+
+# TODO: how do I figure out undrafted value?
+
+class Report:
+
+  def __init__(self, sources):
+    self.sources = sources
+    self.source_lengths = [241] * len(sources)
+
+  def get_picks(self):
+    picks = []
+    for i, source in enumerate(self.sources):
+      source_picks = source.get_picks(i)
+      picks += source.get_picks(i)
+      self.source_lengths[i] = len(source_picks)
+    return picks
+
+  def generate(self):
+    picks = get_picks()
+    players = {}
+    for pick in self.picks:
+      if pick.player in player:
+        # update players
+      else:
+        # create new player
+
+class Source:
+
+  def get_picks(source_num):
+    picks = []
+    for row in rows:
+      picks.append(Pick(row.player, row.pick_num, row.source_num, ...))
+    return picks
+
+class Pick:
+
+  def __init__(self, player, pick_num, source_num, team="", position=""):
+    pass
+
