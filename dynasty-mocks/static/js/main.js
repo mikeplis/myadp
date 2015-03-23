@@ -34,8 +34,8 @@ $(document).ready(function() {
           "aButtons": []
       },
       initComplete: function (settings) {
-        // show processing indicator only when data is loading
-        $(".dataTables_processing").hide()
+        // show processing indicator only when data is loading; if we just hide() it'll flash every time we sort, search, etc
+        $(".dataTables_processing").remove()
 
         var api = this.api();
         api.order([4, 'asc']).draw();
