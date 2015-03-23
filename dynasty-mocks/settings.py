@@ -29,7 +29,6 @@ TEMPLATE_DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', 'dynasty-mocks.herokuapp.com']
 
-
 # Application definition
 
 INSTALLED_APPS = (
@@ -90,11 +89,17 @@ DATABASES['default'] =  dj_database_url.config()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Allow all host headers
-ALLOWED_HOSTS = ['*']
+#ALLOWED_HOSTS = ['*']
 
 # Static asset configuration
 #BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-STATIC_ROOT = 'staticfiles'
+
+if DEBUG: 
+   STATIC_ROOT = os.path.join(BASE_DIR, '/static')
+else:
+   STATIC_ROOT = os.path.join(BASE_DIR, 'static') 
+
+#STATIC_ROOT = 'staticfiles'
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
