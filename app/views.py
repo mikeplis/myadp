@@ -46,11 +46,13 @@ class Report:
     source_lengths = [None] * len(self.sources)
     for i, source in enumerate(self.sources):
       try:
-        (source_picks, is_draft_finished) = source.get_picks(i)
+        (source_picks, is_draft_finished) = source.get_picks()
       except AttributeError:
         logger.info(sys.exc_info())
         logger.info('problem processing source: {}'.format(source))
         continue
+      for sp in source_picks:
+        sp.source_num = i
       picks += source_picks
       if is_draft_finished:
         source_lengths[i] = len(source_picks)
@@ -86,10 +88,9 @@ class Player:
 
 class Pick:
 
-  def __init__(self, name, pick_num, source_num, team="", position=""):
+  def __init__(self, name, pick_num, team="", position=""):
     self.name = name
     self.pick_num = pick_num
-    self.source_num = source_num
     self.team = team
     self.position = position
 
@@ -104,7 +105,7 @@ class MFLSource(DataSource):
 
   # TODO: remove source_num logic from Source
   # TODO: why does this function need `source` passed in?
-  def get_picks(self, source, source_num):
+  def get_picks(self, source):
     picks = []
     soup = BeautifulSoup(source)
     rows = soup.find('table', {'class': 'report'}).find_all('tr')[1:]
@@ -123,7 +124,6 @@ class MFLSource(DataSource):
       pick = Pick(
         name=player[0],
         pick_num=pick_num,
-        source_num=source_num,
         team=player[1],
         position=player[2])
       picks.append(pick)
@@ -138,9 +138,9 @@ class LiveMFLSource(MFLSource):
   def __str__(self):
     return 'LiveMFLSource(year={}, league_id={})'.format(self.year, self.league_id)
 
-  def get_picks(self, source_num):
+  def get_picks(self):
     page = urllib2.urlopen(self.url).read()
-    return MFLSource.get_picks(self, page, source_num)
+    return MFLSource.get_picks(self, page)
 
 # TODO: remove this class and have single MFLSource that downloads the page when the draft is finished
 class DownloadedMFLSource(MFLSource):
