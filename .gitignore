@@ -4,3 +4,4 @@ staticfiles
 .env
 *~
 .DS_STORE
+static/
