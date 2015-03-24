@@ -16,6 +16,8 @@
   </thead>
   <tbody>
 </table>
-<script type="text/javascript">var apiUrl = "{{ api_url|escapejs }}";</script>
+<script type="text/javascript">
+  var apiData = JSON.parse("{{ api_data|escapejs }}")
+</script>
 {% endblock %}
 

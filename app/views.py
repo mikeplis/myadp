@@ -26,6 +26,7 @@ def get_item(dictionary, key):
 def get_range(value):
   return range(value)
 
+# TODO: move these model classes to their own file
 class Report:
 
   def __init__(self, sources):
@@ -95,6 +96,7 @@ class Pick:
     self.team = team
     self.position = position
 
+# TODO: move these model classes to their own file
 class DataSource:
   pass
 
@@ -134,7 +136,6 @@ class LiveMFLSource(MFLSource):
 
   def __init__(self, year, league_id):
     MFLSource.__init__(self, year, league_id)
-    #self.url = 'http://football.myfantasyleague.com/{}/options?L={}&O=17'.format(year, league_id)
 
   def __str__(self):
     return 'LiveMFLSource(year={}, league_id={})'.format(self.year, self.league_id)
@@ -143,170 +144,65 @@ class LiveMFLSource(MFLSource):
     page = urllib2.urlopen(self.url).read()
     return MFLSource.get_picks(self, page)
 
-class DownloadedMFLSource(MFLSource):
-  def __init__(self, year, league_id):
-    MFLSource.__init__(self, year, league_id)
-    # TODO: use correct file path
-    self.filename = 'mfl_year-{}_league-{}.html'.format(year, league_id)
-    self.full_path = os.path.join(settings.BASE_DIR, 'static', 'data', self.filename)
 
-  # TODO: download page and save to file
-  def download_page(self):
-    page = urllib2.urlopen(self.url).read()
-    with open(self.full_path, 'w') as f:
-      f.write(page)
-    return page
+def create_context(sources):
+  api_data = {
+    'years': [x[0] for x in sources],
+    'league_ids': [x[1] for x in sources]
+  }
+  context = {
+    'num_mocks': len(sources),
+    'api_data': json.dumps(api_data)
+  }
+  return context
 
-  def get_picks(self):
-    if not os.path.isfile(self.full_path):
-      page = self.download_page()
-    else:
-      page = open(self.full_path).read()
-    return MFLSource.get_picks(self, page)
-
-# class CSVMultiSource(DataSource):
-#   """ CSV file that contains results from several drafts
-
-#   Each row in the file should contain a player name and his draft positions
-#   """
-#   kind = 'multi_csv'
-
-#   def __init__(self, filename):
-#     self.filename = filename
-
-#   def get_data(self):
-#     with open(os.path.join('dynasty-mocks', 'static', 'data', self.filename), 'rU') as f:
-#       reader = csv.reader(f)
-#       rows = []
-#       for row in reader:
-#         draft_positions = []
-#         for i, draft_position in enumerate(row[1:], start=1):
-#           try:
-#             draft_positions.append(int(draft_position))
-#           except:
-#             draft_positions.append(None)
-#         player = Player(name=row[0], draft_positions=draft_positions)
-#         rows.append(player.to_row())
-#     return rows
-
-# class CSVSource(DataSource):
-#   kind = 'csv'
-
-#   def __init__(self, filename):
-#     self.filename = filename
-
-#   def get_data(self):
-#     pass
-
-dynastyff_report = Report([
-  LiveMFLSource(2014, 73465),
-  LiveMFLSource(2014, 79019)
-])
-
-dynastyff_2qb_report = Report([
-  LiveMFLSource(2015, 70578),
-  LiveMFLSource(2015, 62878),
-  LiveMFLSource(2015, 79056),
-  LiveMFLSource(2015, 53854),
-  LiveMFLSource(2015, 66771),
-  LiveMFLSource(2015, 71287)
-])
-
-dlf_report = Report([
-  DownloadedMFLSource(2015, 46044),
-  DownloadedMFLSource(2015, 26815),
-  DownloadedMFLSource(2015, 38385),
-  DownloadedMFLSource(2015, 59370),
-  DownloadedMFLSource(2015, 49255),
-  DownloadedMFLSource(2015, 45505)
-])
-
-nasty26_report = Report([
-  DownloadedMFLSource(2015, 71481),
-  DownloadedMFLSource(2015, 72926),
-  DownloadedMFLSource(2015, 78189),
-  DownloadedMFLSource(2015, 75299),
-  DownloadedMFLSource(2015, 76129),
-  LiveMFLSource(2015, 69009),
-  LiveMFLSource(2015, 60806)
-])
-
-#dynastyff_rookie_source = CSVMultiSource('dynasty_ff_rookie.csv')
 
 def index(request):
   return render(request, 'index.html')
 
 def dynastyffonly(request):
-  context = {
-    'num_mocks': len(dynastyff_report.sources),
-    'api_url': 'api/dynastyffonly'
-  }
+  sources = [
+    (2014, 73465),
+    (2014, 79019)
+  ]
+  context = create_context(sources)
   return render(request, 'table.html', context)
-
-def dynastyffonly_api(request):
-  x = dynastyff_report.generate()
-  return HttpResponse(json.dumps({'data': x}), content_type="application/json")
 
 def dynastyff2qb(request):
-  context = {
-    'num_mocks': len(dynastyff_2qb_report.sources),
-    'api_url': 'api/dynastyff2qb'
-  }
+  sources = [
+    (2015, 70578),
+    (2015, 62878),
+    (2015, 79056),
+    (2015, 53854),
+    (2015, 66771),
+    (2015, 71287)
+  ]
+  context = create_context(sources)
   return render(request, 'table.html', context)
-
-def dynastyff2qb_api(request):
-  x = dynastyff_2qb_report.generate()
-  return HttpResponse(json.dumps({'data': x}), content_type="application/json")
-
-def dlf(request):
-  context = {
-    'num_mocks': len(dlf_report.sources),
-    'api_url': 'api/dlf'
-  }
-  return render(request, 'table.html', context)
-
-def dlf_api(request):
-  x = dlf_report.generate()
-  return HttpResponse(json.dumps({'data': x}), content_type="application/json")
 
 def nasty26(request):
-  context = {
-    'num_mocks': len(nasty26_report.sources),
-    'api_url': 'api/nasty26'
-  }
+  sources = [
+    (2015, 71481),
+    (2015, 72926),
+    (2015, 78189),
+    (2015, 75299),
+    (2015, 76129),
+    (2015, 69009),
+    (2015, 60806)
+  ]
+  context = create_context(sources)
   return render(request, 'table.html', context)
-
-def nasty26_api(request):
-  x = nasty26_report.generate()
-  return HttpResponse(json.dumps({'data': x}), content_type="application/json")
-
-def dynastyff_rookie(request):
-  context = {
-    'num_mocks': 6,
-    'api_url': 'api/dynastyffrookie'
-  }
-  return render(request, 'table.html', context)
-
-def dynastyff_rookie_api(request):
-  x = dynastyff_rookie_source.get_data()
-  return HttpResponse(json.dumps({'data': x}), content_type="application/json")
 
 def dynastyffmixed(request):
   messages.add_message(request, messages.INFO, "The dynastyffmixed page has been removed")
   return redirect('index')
 
+def generate_report(request):
+  years = map(int, request.GET.getlist('years[]'))
+  league_ids = map(int, request.GET.getlist('league_ids[]'))
+  sources = [LiveMFLSource(year, league_id) for (year, league_id) in zip(years, league_ids)]
+  data = Report(sources).generate()
+  return HttpResponse(json.dumps({'data': data}), content_type="application/json")
+
 def test(request):
-  x = os.path.join(settings.BASE_DIR, 'assets', 'data', 'foobar.csv')
-  if os.path.isfile(x):
-    messages.add_message(request, messages.INFO, 'true')
-  else:
-    messages.add_message(request, messages.INFO, x)
-  return render(request, 'index.html')
-
-def test2(request):
-  context = {
-    'num_mocks': len(dynastyff_2qb_report),
-    'api_url': 'test'
-  }
-  return render(request, 'table.html', context)
-
+  return redirect('index')

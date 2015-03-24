@@ -10,7 +10,10 @@ $(document).ready(function() {
     } );
 
     var t = $('#' + tableId).DataTable({
-      "ajax": apiUrl, // defined in table.html
+      "ajax": {
+        "url": "generate_report",
+        "data": apiData // defined in table.html
+      },
       "paging": false,
       "processing": true,
       "dom": 'T<"clear">lrtip',
