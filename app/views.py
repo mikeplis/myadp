@@ -208,7 +208,3 @@ def nasty26(request):
   ]
   context = create_context(sources)
   return render(request, 'table.html', context)
-
-def dynastyffmixed(request):
-  messages.add_message(request, messages.INFO, "The dynastyffmixed page has been removed")
-  return redirect('index')
