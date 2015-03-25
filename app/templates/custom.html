@@ -1,0 +1,56 @@
+{% extends "main.html" %}
+{% block content %}
+<p>Enter the year and ID of the MFL leagues you'd like to use to generate your custom ADP report</p>
+<form id="custom-form" class="form-horizontal" role="form">
+    <div class="form-group entry">
+      <div class="col-md-8">
+          <div class="form-group row">
+              <label for="league-year" class="col-md-2 control-label">League Year</label>
+              <div class="col-md-2">
+                  <input type="text" class="form-control" id="league-year">
+              </div>
+              <label for="league-id" class="col-md-2 control-label">League ID</label>
+              <div class="col-md-2">
+                  <input type="text" class="form-control" id="league-id">
+              </div>
+              <button class="btn btn-success btn-add" type="button">
+                <span class="glyphicon glyphicon-plus"></span>
+              </button>
+          </div>
+      </div>
+    </div>
+</form>
+<button type="button" class="btn btn-primary btn-submit">Submit</button>
+
+<script type="text/javascript">
+  $(function() {
+    $(document).on('click', '.btn-add', function(e) {
+      e.preventDefault();
+      var form = $('#custom-form'),
+          currentEntry = $(this).parents('.entry:first'),
+          newEntry = $(currentEntry.clone()).appendTo(form);
+
+      newEntry.find('input').val('');
+      form.find('.entry:not(:last) .btn-add')
+        .removeClass('btn-add').addClass('btn-remove')
+        .removeClass('btn-success').addClass('btn-danger')
+        .html('<span class="glyphicon glyphicon-minus"></span>');
+    }).on('click', '.btn-remove', function(e) {
+      $(this).parents('.entry:first').remove();
+      e.preventDefault();
+      return false;
+    }).on('click', '.btn-submit', function(e) {
+      var years = [],
+          leagueIds = [],
+          data = {};
+      $('.row').each(function(i, e) {
+        years.push($(e).find('#league-year').val());
+        leagueIds.push($(e).find('#league-id').val());
+      });
+      data['years'] = years
+      data['league_ids'] = leagueIds
+      window.location.href = ('/report/custom?' + $.param(data))
+    });
+  });
+</script>
+{% endblock %}

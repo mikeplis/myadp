@@ -2,6 +2,7 @@ $(document).ready(function() {
 
   var tableId = 'data'
 
+  // necessary here until I figure out how to only load main.js on a page with a table (e.g. not the home page)
   if ($('#' + tableId).length > 0) {
 
     $('#' + tableId + ' thead th').eq(1).each( function () {
@@ -11,7 +12,7 @@ $(document).ready(function() {
 
     var t = $('#' + tableId).DataTable({
       "ajax": {
-        "url": "generate_report",
+        "url": "/generate",
         "data": apiData // defined in table.html
       },
       "paging": false,

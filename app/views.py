@@ -160,6 +160,22 @@ def create_context(sources):
 def index(request):
   return render(request, 'index.html')
 
+def generate_report(request):
+  years = map(int, request.GET.getlist('years[]'))
+  league_ids = map(int, request.GET.getlist('league_ids[]'))
+  sources = [LiveMFLSource(year, league_id) for (year, league_id) in zip(years, league_ids)]
+  data = Report(sources).generate()
+  return HttpResponse(json.dumps({'data': data}), content_type="application/json")
+
+def custom_page(request):
+  return render(request, 'custom.html')
+
+def custom_report(request):
+  years = map(int, request.GET.getlist('years[]'))
+  league_ids = map(int, request.GET.getlist('league_ids[]'))
+  context = create_context(zip(years, league_ids))
+  return render(request, 'table.html', context)
+
 def dynastyffonly(request):
   sources = [
     (2014, 73465),
@@ -195,14 +211,4 @@ def nasty26(request):
 
 def dynastyffmixed(request):
   messages.add_message(request, messages.INFO, "The dynastyffmixed page has been removed")
-  return redirect('index')
-
-def generate_report(request):
-  years = map(int, request.GET.getlist('years[]'))
-  league_ids = map(int, request.GET.getlist('league_ids[]'))
-  sources = [LiveMFLSource(year, league_id) for (year, league_id) in zip(years, league_ids)]
-  data = Report(sources).generate()
-  return HttpResponse(json.dumps({'data': data}), content_type="application/json")
-
-def test(request):
   return redirect('index')
