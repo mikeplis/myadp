@@ -19,8 +19,8 @@ import warnings
 logger = logging.getLogger('testlogger')
 
 @register.filter
-def get_item(dictionary, key):
-  return dictionary[key]
+def get_item(_list, key):
+  return _list[int(key)]
 
 @register.filter
 def get_range(value):
@@ -150,9 +150,11 @@ def create_context(sources):
     'years': [x[0] for x in sources],
     'league_ids': [x[1] for x in sources]
   }
+  base_url = 'http://football.myfantasyleague.com/{}/options?L={}&O=17'
   context = {
     'num_mocks': len(sources),
-    'api_data': json.dumps(api_data)
+    'api_data': json.dumps(api_data),
+    'urls': [base_url.format(year, league_id) for (year, league_id) in sources]
   }
   return context
 

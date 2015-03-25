@@ -10,7 +10,7 @@
       <th>ADP</th>
       <th>Standard Deviation</th>
       {% for i in num_mocks|get_range %}
-        <th>Mock #{{ i }}</th>
+        <th class="league-header"><a href="{{ urls|get_item:i }}">League #{{ i }}</a></th>
       {% endfor %}
     </tr>
   </thead>
