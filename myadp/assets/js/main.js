@@ -1,22 +1,26 @@
 $(document).ready(function() {
 
-  var tableId = 'data'
+  var tableId = '#data'
 
   // necessary here until I figure out how to only load main.js on a page with a table (e.g. not the home page)
-  if ($('#' + tableId).length > 0) {
+  if ($(tableId).length > 0) {
 
-    $('#' + tableId + ' thead th').eq(1).each( function () {
-      var title = $('#' + tableId + ' thead th').eq( $(this).index() ).text();
+    var over = '<div id="overlay">' +
+            '<img id="loading" src="/static/images/ajax-loader.gif">' +
+            '</div>';
+    $(over).appendTo(tableId);
+
+    $(tableId + ' thead th').eq(1).each( function () {
+      var title = $(tableId + ' thead th').eq( $(this).index() ).text();
       $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
     } );
 
-    var t = $('#' + tableId).DataTable({
+    var t = $(tableId).DataTable({
       "ajax": {
         "url": "/generate",
         "data": apiData // defined in table.html
       },
       "paging": false,
-      "processing": true,
       "dom": 'T<"clear">lrtip',
       "columnDefs": [
         {
@@ -38,8 +42,7 @@ $(document).ready(function() {
           "aButtons": []
       },
       initComplete: function (settings) {
-        // show processing indicator only when data is loading; if we just hide() it'll flash every time we sort, search, etc
-        $(".dataTables_processing").remove()
+        $('#overlay').hide();
 
         var api = this.api();
         api.order([4, 'asc']).draw();
