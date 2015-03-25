@@ -1,1 +1,1 @@
-web: gunicorn dynasty-mocks.wsgi --log-file -
+web: gunicorn myadp.wsgi --log-file -

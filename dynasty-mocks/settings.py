@@ -1,5 +1,5 @@
 """
-Django settings for dynasty-mocks project.
+Django settings for myadp project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/1.6/topics/settings/
@@ -27,7 +27,7 @@ DEBUG = False
 
 TEMPLATE_DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', 'dynasty-mocks.herokuapp.com']
+ALLOWED_HOSTS = ['localhost', 'myadp.herokuapp.com']
 
 # Application definition
 
@@ -50,9 +50,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'dynasty-mocks.urls'
+ROOT_URLCONF = 'myadp.urls'
 
-WSGI_APPLICATION = 'dynasty-mocks.wsgi.application'
+WSGI_APPLICATION = 'myadp.wsgi.application'
 
 
 # Database
