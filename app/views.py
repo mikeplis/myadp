@@ -145,10 +145,10 @@ class LiveMFLSource(MFLSource):
     return MFLSource.get_picks(self, page)
 
 
-def create_context(sources):
+def create_context(sources, names=None):
   api_data = {
     'years': [x[0] for x in sources],
-    'league_ids': [x[1] for x in sources]
+    'leagueIds': [x[1] for x in sources]
   }
   base_url = 'http://football.myfantasyleague.com/{}/options?L={}&O=17'
   context = {
@@ -156,6 +156,8 @@ def create_context(sources):
     'api_data': json.dumps(api_data),
     'urls': [base_url.format(year, league_id) for (year, league_id) in sources]
   }
+  if names is not None:
+    context['names'] = names
   return context
 
 
@@ -164,7 +166,7 @@ def index(request):
 
 def generate_report(request):
   years = map(int, request.GET.getlist('years[]'))
-  league_ids = map(int, request.GET.getlist('league_ids[]'))
+  league_ids = map(int, request.GET.getlist('leagueIds[]'))
   sources = [LiveMFLSource(year, league_id) for (year, league_id) in zip(years, league_ids)]
   data = Report(sources).generate()
   return HttpResponse(json.dumps({'data': data}), content_type="application/json")
@@ -174,8 +176,9 @@ def custom_page(request):
 
 def custom_report(request):
   years = map(int, request.GET.getlist('years[]'))
-  league_ids = map(int, request.GET.getlist('league_ids[]'))
-  context = create_context(zip(years, league_ids))
+  league_ids = map(int, request.GET.getlist('leagueIds[]'))
+  names = request.GET.getlist('names[]')
+  context = create_context(zip(years, league_ids), names)
   return render(request, 'table.html', context)
 
 def dynastyffonly(request):

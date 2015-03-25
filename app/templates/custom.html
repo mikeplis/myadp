@@ -3,15 +3,16 @@
 <p>Enter the year and ID of the MFL leagues you'd like to use to generate your custom ADP report</p>
 <form id="custom-form" class="form-horizontal" role="form">
     <div class="form-group entry">
-      <div class="col-md-8">
+      <div class="col-md-12">
           <div class="form-group row">
-              <label for="league-year" class="col-md-2 control-label">League Year</label>
               <div class="col-md-2">
-                  <input type="text" class="form-control" id="league-year">
+                  <input type="text" class="form-control" id="league-year" placeholder="League Year">
               </div>
-              <label for="league-id" class="col-md-2 control-label">League ID</label>
               <div class="col-md-2">
-                  <input type="text" class="form-control" id="league-id">
+                  <input type="text" class="form-control" id="league-id" placeholder="League ID">
+              </div>
+              <div class="col-md-2">
+                  <input type="text" class="form-control" id="league-name" placeholder="Name (optional)">
               </div>
               <button class="btn btn-success btn-add" type="button">
                 <span class="glyphicon glyphicon-plus"></span>
@@ -40,15 +41,16 @@
       e.preventDefault();
       return false;
     }).on('click', '.btn-submit', function(e) {
-      var years = [],
-          leagueIds = [],
-          data = {};
+      var data = {
+        years: [],
+        leagueIds: [],
+        names: []
+      };
       $('.row').each(function(i, e) {
-        years.push($(e).find('#league-year').val());
-        leagueIds.push($(e).find('#league-id').val());
+        data.years.push($(e).find('#league-year').val());
+        data.leagueIds.push($(e).find('#league-id').val());
+        data.names.push($(e).find('#league-name').val());
       });
-      data['years'] = years
-      data['league_ids'] = leagueIds
       window.location.href = ('/report/custom?' + $.param(data))
     });
   });
