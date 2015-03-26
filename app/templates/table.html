@@ -1,5 +1,8 @@
 {% extends "main.html" %}
 {% block content %}
+{% if is_editable %}
+  <button class='btn btn-primary pull-right btn-update' type="submit">Edit this report</button>
+{% endif %}
 <table id="data" class="table table-condensed display">
   <thead>
     <tr>
@@ -23,7 +26,12 @@
   <tbody>
 </table>
 <script type="text/javascript">
-  var apiData = JSON.parse("{{ api_data|escapejs }}")
+  var apiData = JSON.parse("{{ api_data|escapejs }}") // used in main.js
+  $(function() {
+    $(".btn-update").click(function() {
+      window.location.href = ('/custom' + window.location.search)
+    });
+  });
 </script>
 {% endblock %}
 

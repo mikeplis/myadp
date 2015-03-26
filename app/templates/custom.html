@@ -2,24 +2,47 @@
 {% block content %}
 <p>Enter the year and ID of the MFL leagues you'd like to use to generate your custom ADP report</p>
 <form id="custom-form" class="form-horizontal" role="form">
-    <div class="form-group entry">
-      <div class="col-md-12">
-          <div class="form-group row">
-              <div class="col-md-2">
-                  <input type="text" class="form-control" id="league-year" placeholder="League Year">
-              </div>
-              <div class="col-md-2">
-                  <input type="text" class="form-control" id="league-id" placeholder="League ID">
-              </div>
-              <div class="col-md-2">
-                  <input type="text" class="form-control" id="league-name" placeholder="Name (optional)">
-              </div>
-              <button class="btn btn-success btn-add" type="button">
-                <span class="glyphicon glyphicon-plus"></span>
-              </button>
-          </div>
+  {% if leagues %}
+    {% for league in leagues %}
+      <div class="form-group entry">
+        <div class="col-md-12">
+            <div class="form-group row">
+                <div class="col-md-2">
+                    <input type="text" class="form-control" id="league-year" placeholder="League Year" value="{{ league.0 }}">
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" id="league-id" placeholder="League ID" value="{{ league.1 }}">
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" id="league-name" placeholder="Name (optional)" value="{{ league.2 }}">
+                </div>
+                <button class="btn btn-success btn-add" type="button">
+                  <span class="glyphicon glyphicon-plus"></span>
+                </button>
+            </div>
+        </div>
       </div>
+    {% endfor %}
+  {% else %}
+  <div class="form-group entry">
+    <div class="col-md-12">
+        <div class="form-group row">
+            <div class="col-md-2">
+                <input type="text" class="form-control" id="league-year" placeholder="League Year">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" id="league-id" placeholder="League ID">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" id="league-name" placeholder="Name (optional)">
+            </div>
+            <button class="btn btn-success btn-add" type="button">
+              <span class="glyphicon glyphicon-plus"></span>
+            </button>
+        </div>
     </div>
+  </div>
+  {% endif %}
 </form>
 <button type="button" class="btn btn-primary btn-submit">Submit</button>
 
@@ -31,7 +54,9 @@
           currentEntry = $(this).parents('.entry:first'),
           newEntry = $(currentEntry.clone()).appendTo(form);
 
-      newEntry.find('input').val('');
+      // only clear id and name fields, leave year field the same
+      newEntry.find('#league-id').val('');
+      newEntry.find('#league-name').val('');
       form.find('.entry:not(:last) .btn-add')
         .removeClass('btn-add').addClass('btn-remove')
         .removeClass('btn-success').addClass('btn-danger')

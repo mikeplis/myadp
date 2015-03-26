@@ -145,7 +145,7 @@ class LiveMFLSource(MFLSource):
     return MFLSource.get_picks(self, page)
 
 
-def create_context(sources, names=None):
+def create_table_context(sources, names=None):
   api_data = {
     'years': [x[0] for x in sources],
     'leagueIds': [x[1] for x in sources]
@@ -160,25 +160,32 @@ def create_context(sources, names=None):
     context['names'] = names
   return context
 
+def parse_data_from_request(request):
+  years = map(int, request.GET.getlist('years[]'))
+  league_ids = map(int, request.GET.getlist('leagueIds[]'))
+  names = request.GET.getlist('names[]')
+  return (years, league_ids, names)
 
 def index(request):
   return render(request, 'index.html')
 
 def generate_report(request):
-  years = map(int, request.GET.getlist('years[]'))
-  league_ids = map(int, request.GET.getlist('leagueIds[]'))
+  (years, league_ids, _) = parse_data_from_request(request)
   sources = [LiveMFLSource(year, league_id) for (year, league_id) in zip(years, league_ids)]
   data = Report(sources).generate()
   return HttpResponse(json.dumps({'data': data}), content_type="application/json")
 
 def custom_page(request):
-  return render(request, 'custom.html')
+  (years, league_ids, names) = parse_data_from_request(request)
+  context = {
+    'leagues': zip(years, league_ids, names)
+  }
+  return render(request, 'custom.html', context)
 
 def custom_report(request):
-  years = map(int, request.GET.getlist('years[]'))
-  league_ids = map(int, request.GET.getlist('leagueIds[]'))
-  names = request.GET.getlist('names[]')
-  context = create_context(zip(years, league_ids), names)
+  (years, league_ids, names) = parse_data_from_request(request)
+  context = create_table_context(zip(years, league_ids), names)
+  context['is_editable'] = True
   return render(request, 'table.html', context)
 
 def dynastyffonly(request):
@@ -186,7 +193,7 @@ def dynastyffonly(request):
     (2014, 73465),
     (2014, 79019)
   ]
-  context = create_context(sources)
+  context = create_table_context(sources)
   return render(request, 'table.html', context)
 
 def dynastyff2qb(request):
@@ -198,7 +205,7 @@ def dynastyff2qb(request):
     (2015, 66771),
     (2015, 71287)
   ]
-  context = create_context(sources)
+  context = create_table_context(sources)
   return render(request, 'table.html', context)
 
 def nasty26(request):
@@ -211,5 +218,5 @@ def nasty26(request):
     (2015, 69009),
     (2015, 60806)
   ]
-  context = create_context(sources)
+  context = create_table_context(sources)
   return render(request, 'table.html', context)

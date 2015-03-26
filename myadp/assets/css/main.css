@@ -19,11 +19,6 @@ th.sorting, th.sorting_asc, th.sorting_desc {
 	cursor: pointer;
 }
 
-
-.dataTables_wrapper {
-  position: relative;
-}
-
 #overlay {
     position: absolute;
     left: 0;
@@ -38,9 +33,9 @@ th.sorting, th.sorting_asc, th.sorting_desc {
 }
 
 #loading {
-    width: 33%;
+    width: 40%;
     display: block;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 20px;
+    margin-top: 10%;
 }
