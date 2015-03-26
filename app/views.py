@@ -125,7 +125,7 @@ class MFLSource(DataSource):
         continue
       pick_num = len(picks) + 1
       pick = Pick(
-        name=player[0],
+        name=player[0].replace('* ', ''),
         pick_num=pick_num,
         team=player[1],
         position=player[2])
