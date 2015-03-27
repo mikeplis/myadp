@@ -21,6 +21,9 @@ $(document).ready(function() {
         "data": apiData // defined in table.html
       },
       "paging": false,
+      "scrollCollapse": true,
+      "scrollY": "75%",
+      "scrollX": true,
       "dom": 'T<"clear">lrtip',
       "columnDefs": [
         {
