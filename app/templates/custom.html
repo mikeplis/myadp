@@ -16,6 +16,9 @@
                 <div class="col-md-2">
                     <input type="text" class="form-control" id="league-name" placeholder="Name (optional)" value="{{ league.2 }}">
                 </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" id="division-id" placeholder="Division ID (optional)" value="{{ league.3 }}">
+                </div>
                 <button class="btn btn-danger btn-remove" type="button">
                   <span class="glyphicon glyphicon-minus"></span>
                 </button>
@@ -35,6 +38,9 @@
             </div>
             <div class="col-md-2">
                 <input type="text" class="form-control" id="league-name" placeholder="Name (optional)">
+            </div>
+            <div class="col-md-2">
+                <input type="text" class="form-control" id="division-id" placeholder="Division ID (optional)">
             </div>
             <button class="btn btn-success btn-add" type="button">
               <span class="glyphicon glyphicon-plus"></span>
@@ -73,12 +79,15 @@
       var data = {
         years: [],
         leagueIds: [],
-        names: []
+        names: [],
+        divisionIds: []
       };
       $('.row').each(function(i, e) {
         data.years.push($(e).find('#league-year').val());
         data.leagueIds.push($(e).find('#league-id').val());
         data.names.push($(e).find('#league-name').val());
+        var divId =  $(e).find('#division-id').val()
+        data.divisionIds.push(divId ? divId : "00");
       });
       window.location.href = ('/report/custom?' + $.param(data))
     });

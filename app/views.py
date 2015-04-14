@@ -102,10 +102,10 @@ class DataSource:
 
 class MFLSource(DataSource):
 
-  def __init__(self, year, league_id):
+  def __init__(self, year, league_id, division_id):
     self.year = year
     self.league_id = league_id
-    self.url = 'http://football.myfantasyleague.com/{}/options?L={}&O=17'.format(year, league_id)
+    self.url = 'http://football.myfantasyleague.com/{}/options?L={}&O=17&DISPLAY=DIVISION{}'.format(year, league_id, division_id)
 
   # TODO: why does this function need `source` passed in?
   def get_picks(self, source):
@@ -134,8 +134,8 @@ class MFLSource(DataSource):
 
 class LiveMFLSource(MFLSource):
 
-  def __init__(self, year, league_id):
-    MFLSource.__init__(self, year, league_id)
+  def __init__(self, year, league_id, division_id):
+    MFLSource.__init__(self, year, league_id, division_id)
 
   def __str__(self):
     return 'LiveMFLSource(year={}, league_id={})'.format(self.year, self.league_id)
@@ -148,75 +148,79 @@ class LiveMFLSource(MFLSource):
 def create_table_context(sources, names=None):
   api_data = {
     'years': [x[0] for x in sources],
-    'leagueIds': [x[1] for x in sources]
+    'leagueIds': [x[1] for x in sources],
+    'divisionIds': [x[2] for x in sources]
   }
-  base_url = 'http://football.myfantasyleague.com/{}/options?L={}&O=17'
+  base_url = 'http://football.myfantasyleague.com/{}/options?L={}&O=17&DISPLAY=DIVISION{}'
   context = {
     'num_mocks': len(sources),
     'api_data': json.dumps(api_data),
-    'urls': [base_url.format(year, league_id) for (year, league_id) in sources]
+    'urls': [base_url.format(year, league_id, division_id) for (year, league_id, division_id) in sources]
   }
   if names is not None:
     context['names'] = names
   return context
 
 def parse_data_from_request(request):
-  years = map(int, request.GET.getlist('years[]'))
-  league_ids = map(int, request.GET.getlist('leagueIds[]'))
+  years = [int(x) for x in request.GET.getlist('years[]')]
+  league_ids = [int(x) for x in request.GET.getlist('leagueIds[]')]
   names = request.GET.getlist('names[]')
-  return (years, league_ids, names)
+  division_ids = ['00'] * len(league_ids)
+  for i, div_id in enumerate(request.GET.getlist('divisionIds[]')):
+    division_ids[i] = div_id.zfill(2)
+  return (years, league_ids, names, division_ids)
 
 def index(request):
   return render(request, 'index.html')
 
 def generate_report(request):
-  (years, league_ids, _) = parse_data_from_request(request)
-  sources = [LiveMFLSource(year, league_id) for (year, league_id) in zip(years, league_ids)]
+  (years, league_ids, _, division_ids) = parse_data_from_request(request)
+  sources = [LiveMFLSource(year, league_id, division_id) for (year, league_id, division_id) in zip(years, league_ids, division_ids)]
   data = Report(sources).generate()
   return HttpResponse(json.dumps({'data': data}), content_type="application/json")
 
 def custom_page(request):
-  (years, league_ids, names) = parse_data_from_request(request)
+  (years, league_ids, names, division_ids) = parse_data_from_request(request)
   context = {
-    'leagues': zip(years, league_ids, names)
+    'leagues': zip(years, league_ids, names, division_ids)
   }
   return render(request, 'custom.html', context)
 
 def custom_report(request):
-  (years, league_ids, names) = parse_data_from_request(request)
-  context = create_table_context(zip(years, league_ids), names)
+  (years, league_ids, names, division_ids) = parse_data_from_request(request)
+  context = create_table_context(zip(years, league_ids, division_ids), names)
   context['is_editable'] = True
   return render(request, 'table.html', context)
 
 def dynastyffonly(request):
   sources = [
-    (2014, 73465),
-    (2014, 79019)
+    (2014, 73465, '00'),
+    (2014, 79019, '00'),
   ]
   context = create_table_context(sources)
   return render(request, 'table.html', context)
 
 def dynastyff2qb(request):
   sources = [
-    (2015, 70578),
-    (2015, 62878),
-    (2015, 79056),
-    (2015, 53854),
-    (2015, 66771),
-    (2015, 71287)
+    (2015, 70578, '00'),
+    (2015, 62878, '00'),
+    (2015, 79056, '00'),
+    (2015, 53854, '00'),
+    (2015, 66771, '00'),
+    (2015, 71287, '00')
   ]
   context = create_table_context(sources)
   return render(request, 'table.html', context)
 
 def nasty26(request):
   sources = [
-    (2015, 71481),
-    (2015, 72926),
-    (2015, 78189),
-    (2015, 75299),
-    (2015, 76129),
-    (2015, 69009),
-    (2015, 60806)
+    (2015, 71481, '00'),
+    (2015, 72926, '00'),
+    (2015, 78189, '00'),
+    (2015, 75299, '00'),
+    (2015, 76129, '00'),
+    (2015, 69009, '00'),
+    (2015, 60806, '00')
   ]
   context = create_table_context(sources)
   return render(request, 'table.html', context)
