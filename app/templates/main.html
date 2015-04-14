@@ -30,11 +30,20 @@
                   <li><a href="/report/dynastyffonly">/r/DynastyFF</a></li>
                   <li><a href="/report/dynastyff2qb">/r/DynastyFF 2 QB</a></li>
                 </ul>
+                <li><a href="/contact">Contact</a></li>
               </li>
             </ul>
           </div><!--/.nav-collapse -->
         </div><!--/.container-fluid -->
       </nav>
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-warning alert-dismissible fade in" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>{{message}}</strong>
+          </div>
+        {% endfor %}
+      {% endif %}
       {% block content %}{% endblock %}
       <footer class="footer">
         <p>Site by <a href="https://twitter.com/m_plis">@m_plis</a></p>

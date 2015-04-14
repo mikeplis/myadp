@@ -8,6 +8,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', app.views.index, name='index'),
+    url(r'^contact$', app.views.contact, name='contact'),
     url(r'^custom$', app.views.custom_page, name='custom_page'),
     url(r'^generate$', app.views.generate_report, name='generate_report'),
     url(r'^report/custom$', app.views.custom_report, name='custom_report'),

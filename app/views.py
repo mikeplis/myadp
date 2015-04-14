@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.template.defaulttags import register
 from django.templatetags.static import static
+from django.utils.safestring import mark_safe
 import logging
 import csv
 import json
@@ -170,8 +171,13 @@ def parse_data_from_request(request):
     division_ids[i] = div_id.zfill(2)
   return (years, league_ids, names, division_ids)
 
+request_for_feedback = mark_safe('Click <a href="/contact">here</a> if you have any feedback. I\'d love to hear how I can make the site better.')
 def index(request):
+  messages.add_message(request, messages.INFO, request_for_feedback)
   return render(request, 'index.html')
+
+def contact(request):
+  return render(request, 'contact.html')
 
 def generate_report(request):
   (years, league_ids, _, division_ids) = parse_data_from_request(request)
@@ -180,6 +186,7 @@ def generate_report(request):
   return HttpResponse(json.dumps({'data': data}), content_type="application/json")
 
 def custom_page(request):
+  messages.add_message(request, messages.INFO, request_for_feedback)
   (years, league_ids, names, division_ids) = parse_data_from_request(request)
   context = {
     'leagues': zip(years, league_ids, names, division_ids)
@@ -187,12 +194,14 @@ def custom_page(request):
   return render(request, 'custom.html', context)
 
 def custom_report(request):
+  messages.add_message(request, messages.INFO, request_for_feedback)
   (years, league_ids, names, division_ids) = parse_data_from_request(request)
   context = create_table_context(zip(years, league_ids, division_ids), names)
   context['is_editable'] = True
   return render(request, 'table.html', context)
 
 def dynastyffonly(request):
+  messages.add_message(request, messages.INFO, request_for_feedback)
   sources = [
     (2014, 73465, '00'),
     (2014, 79019, '00'),
@@ -201,6 +210,7 @@ def dynastyffonly(request):
   return render(request, 'table.html', context)
 
 def dynastyff2qb(request):
+  messages.add_message(request, messages.INFO, request_for_feedback)
   sources = [
     (2015, 70578, '00'),
     (2015, 62878, '00'),
@@ -213,6 +223,7 @@ def dynastyff2qb(request):
   return render(request, 'table.html', context)
 
 def nasty26(request):
+  messages.add_message(request, messages.INFO, request_for_feedback)
   sources = [
     (2015, 71481, '00'),
     (2015, 72926, '00'),
