@@ -212,12 +212,14 @@ def dynastyffonly(request):
 def dynastyff2qb(request):
   messages.add_message(request, messages.INFO, request_for_feedback)
   sources = [
-    (2015, 70578, '00'),
-    (2015, 62878, '00'),
-    (2015, 79056, '00'),
-    (2015, 53854, '00'),
-    (2015, 66771, '00'),
-    (2015, 71287, '00')
+    (2015, 66893, '00'),
+    (2015, 62419, '00'),
+    (2015, 66671, '00'),
+    (2015, 59345, '00'),
+    (2015, 56299, '00'),
+    (2015, 50561, '00'),
+    (2015, 62559, '00'),
+    (2015, 70754, '00')
   ]
   context = create_table_context(sources)
   return render(request, 'table.html', context)
