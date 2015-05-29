@@ -15,5 +15,7 @@ urlpatterns = patterns('',
     url(r'^report/dynastyffonly$', app.views.dynastyffonly, name='dynastyffonly'),
     url(r'^report/dynastyff2qb$', app.views.dynastyff2qb, name='dynastyff2qb'),
     url(r'^report/nasty26$', app.views.nasty26, name='nasty26'),
+    url(r'^report/scottfish/([\w-]+)$', app.views.scottfish, name='scottfish'),
+    url(r'^report/scottfish$', app.views.scottfish, {'conference_name': None}, name='scottfish'),
     url(r'^admin/$', include(admin.site.urls)),
 ) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

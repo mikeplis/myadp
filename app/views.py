@@ -237,3 +237,72 @@ def nasty26(request):
   ]
   context = create_table_context(sources)
   return render(request, 'table.html', context)
+
+# TODO: http://docs.themoviedb.apiary.io/#
+
+def scottfish(request, conference_name):
+  conferences = {
+    'zoolander': {
+      'names': ['Blue Steel', 'Magnum', 'Hansel', 'Mugatu', 'Maury Ballstein'],
+      'league_id': 63005,
+    },
+    'step-brothers': {
+      'names': ['Boats N Hoes', 'Catalina Wine Mixer', 'Prestige Worldwide', 'Nuts on Drumset', 'Shark Week'],
+      'league_id': 75504
+    },
+    'anchorman': {
+      'names': ['Dorothy Mantooth', 'I Love Lamp', 'Sex Panther', 'Glass Case', 'Escalated Quickly'],
+      'league_id': 56539
+    },
+    'old-school': {
+      'names': ["We're Going Streaking", "You're My Boy Blue", 'Earmuffs', 'Frank the Tank', 'Mitch-a-Palooza'],
+      'league_id': 57897
+    },
+    'talladega-nights': {
+      'names': ['Shake and Bake', "Not First, You're Last", 'Spider Monkey', 'That Just Happened', 'Go Fast'],
+      'league_id': 66231
+    },
+    'snl': {
+      'names': ['More Cowbell', 'Suck It, Trebek', 'Harry Caray', 'Bill Brasky', 'Dodge Stratus'],
+      'league_id': 59129
+    }
+  }
+  year = 2015
+  if conference_name and conference_name in conferences:
+    data = conferences[conference_name]
+    league_id = data['league_id']
+    sources = [
+      (year, league_id, '00'),
+      (year, league_id, '01'),
+      (year, league_id, '02'),
+      (year, league_id, '03'),
+      (year, league_id, '04'),
+    ]
+    context = create_table_context(sources, data['names'])
+    return render(request, 'scottfish.html', context)
+  else:
+    league_ids = []
+    names = []
+    for conf_data in conferences.values():
+      names += conf_data['names']
+      league_ids.append(conf_data['league_id'])
+    sources = []
+    for league_id in league_ids:
+      s = [
+        (year, league_id, '00'),
+        (year, league_id, '01'),
+        (year, league_id, '02'),
+        (year, league_id, '03'),
+        (year, league_id, '04'),
+      ]
+      sources += s
+    context = create_table_context(sources, names)
+    return render(request, 'scottfish.html', context)
+
+
+
+
+
+
+
+
