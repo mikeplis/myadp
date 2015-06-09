@@ -38,11 +38,23 @@ $(document).ready(function() {
         }
       ],
       "tableTools": {
-          "sSwfPath": "/static/swf/copy_csv_xls_pdf.swf",
+          // "sSwfPath": "/static/swf/copy_csv_xls_pdf.swf",
+          "sSwfPath": "http://cdn.datatables.net/tabletools/2.2.2/swf/copy_csv_xls_pdf.swf",
           "sRowSelect": "os",
           // if sSelectedClass is changed, must also change selected class in _fnFilterColumn in datatables js file
           "sSelectedClass": "selected",
-          "aButtons": []
+          "aButtons": [
+            {
+              "sExtends": "csv",
+              "sButtonText": "Export to CSV",
+              // export all columns except for the first column (Rank)
+              "mColumns": function (x) { 
+                var columnIndexes = [];
+                for (i = 1; i < x['aoColumns'].length; i++) { columnIndexes.push(i); }
+                return columnIndexes;
+              }
+            }
+          ]
       },
       initComplete: function (settings) {
         $('#overlay').hide();
