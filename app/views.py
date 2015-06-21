@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.template.defaulttags import register
 from django.templatetags.static import static
 from django.utils.safestring import mark_safe
+from django.views.decorators.clickjacking import xframe_options_exempt
 import logging
 import csv
 import json
@@ -173,7 +174,7 @@ def parse_data_from_request(request):
 
 request_for_feedback = mark_safe('Click <a href="/contact">here</a> if you have any feedback. I\'d love to hear how I can make the site better.')
 def index(request):
-  messages.add_message(request, messages.INFO, request_for_feedback)
+  #messages.add_message(request, messages.INFO, request_for_feedback)
   return render(request, 'index.html')
 
 def contact(request):
@@ -185,23 +186,26 @@ def generate_report(request):
   data = Report(sources).generate()
   return HttpResponse(json.dumps({'data': data}), content_type="application/json")
 
+@xframe_options_exempt
 def custom_page(request):
-  messages.add_message(request, messages.INFO, request_for_feedback)
+  #messages.add_message(request, messages.INFO, request_for_feedback)
   (years, league_ids, names, division_ids) = parse_data_from_request(request)
   context = {
     'leagues': zip(years, league_ids, names, division_ids)
   }
   return render(request, 'custom.html', context)
 
+@xframe_options_exempt
 def custom_report(request):
-  messages.add_message(request, messages.INFO, request_for_feedback)
+  #messages.add_message(request, messages.INFO, request_for_feedback)
   (years, league_ids, names, division_ids) = parse_data_from_request(request)
   context = create_table_context(zip(years, league_ids, division_ids), names)
   context['is_editable'] = True
   return render(request, 'table.html', context)
 
+@xframe_options_exempt
 def dynastyffonly(request):
-  messages.add_message(request, messages.INFO, request_for_feedback)
+  #messages.add_message(request, messages.INFO, request_for_feedback)
   sources = [
     (2014, 73465, '00'),
     (2014, 79019, '00'),
@@ -209,8 +213,9 @@ def dynastyffonly(request):
   context = create_table_context(sources)
   return render(request, 'table.html', context)
 
+@xframe_options_exempt
 def dynastyff2qb(request):
-  messages.add_message(request, messages.INFO, request_for_feedback)
+  #messages.add_message(request, messages.INFO, request_for_feedback)
   sources = [
     (2015, 66893, '00'),
     (2015, 62419, '00'),
@@ -224,8 +229,9 @@ def dynastyff2qb(request):
   context = create_table_context(sources)
   return render(request, 'table.html', context)
 
+@xframe_options_exempt
 def nasty26(request):
-  messages.add_message(request, messages.INFO, request_for_feedback)
+  #messages.add_message(request, messages.INFO, request_for_feedback)
   sources = [
     (2015, 71481, '00'),
     (2015, 72926, '00'),
@@ -239,7 +245,7 @@ def nasty26(request):
   return render(request, 'table.html', context)
 
 # TODO: http://docs.themoviedb.apiary.io/#
-
+@xframe_options_exempt
 def scottfish(request, conference_name):
   conferences = {
     'zoolander': {
