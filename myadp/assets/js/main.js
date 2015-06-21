@@ -22,7 +22,7 @@ $(document).ready(function() {
       },
       "paging": false,
       "scrollCollapse": true,
-      "scrollY": "75%",
+      // "scrollY": "75%",
       "scrollX": true,
       "dom": 'T<"clear">lrtip',
       "columnDefs": [
