@@ -94,5 +94,7 @@ $(document).ready(function() {
         cell.innerHTML = i+1;
       });
     }).draw();
+
+    $("#ToolTables_data_0").addClass("btn btn-default pull-right").css("margin-right", "5px");
   }
 });
