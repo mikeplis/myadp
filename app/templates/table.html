@@ -1,7 +1,13 @@
 {% extends "main.html" %}
 {% block content %}
 {% if is_editable %}
+<form>
+  <div class="form-group">
+    <label for="playerFilter">Search Players</label>
+    <input id="playerFilter" class="form-control">
+  </div>
   <button class='btn btn-primary pull-right btn-update' type="submit">Edit this report</button>
+</form>
 {% endif %}
 <table id="data" class="table table-condensed display">
   <thead>

@@ -10,11 +10,6 @@ $(document).ready(function() {
             '</div>';
     $(over).appendTo(tableId);
 
-    $(tableId + ' thead th').eq(1).each( function () {
-      var title = $(tableId + ' thead th').eq( $(this).index() ).text();
-      $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
-    } );
-
     var t = $(tableId).DataTable({
       "ajax": {
         "url": "/generate",
@@ -80,21 +75,20 @@ $(document).ready(function() {
       }
     });
 
-    t.columns().eq(0).each( function ( colIdx ) {
-        $( 'input', t.column( colIdx ).header() ).on( 'keyup change', function () {
-            t
-                .column( colIdx )
-                .search( this.value )
-                .draw();
-        } );
-    } );
 
+    $("#playerFilter").on("keyup change", function() {
+      // TODO: don't hard code Name column index
+      t.column(1).search(this.value).draw();
+    });
+
+    // creates Rank column
     t.on('order.dt search.dt', function() {
       t.column(0, {search:'applied', order:'applied'}).nodes().each(function(cell, i) {
         cell.innerHTML = i+1;
       });
     }).draw();
 
+    // TODO: move css out of this file
     $("#ToolTables_data_0").addClass("btn btn-default pull-right").css("margin-right", "5px");
   }
 });
