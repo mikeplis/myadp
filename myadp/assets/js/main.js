@@ -10,7 +10,7 @@ $(document).ready(function() {
         if($(this).find("th").length) {
             $(this).find("th").each(function() {
               tmpStr = $(this).text().replace(/"/g, '""');
-              tmpArr.push('"' + tmpStr + '"');
+              tmpArr.push('"' + tmpStr.trim() + '"');
             });
             csvData.push(tmpArr);
         } else {

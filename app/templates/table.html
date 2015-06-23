@@ -38,7 +38,13 @@
       <th>Standard Deviation</th>
       {% for i in num_mocks|get_range %}
         <th class="league-header">
-        <a href="{{ urls|get_item:i }}">{% if names|get_item:i != '' %}{{ names|get_item:i }}{% else %}Draft #{{ i }}{% endif %}</a></th>
+        <a href="{{ urls|get_item:i }}">
+          {% if names|get_item:i != '' %}
+            {{ names|get_item:i }}
+          {% else %}
+            Draft #{{ i }}
+          {% endif %}
+        </a></th>
       {% endfor %}
     </tr>
   </thead>
