@@ -1,28 +1,17 @@
-<!-- TODO
-- set class of Home in navbar to "active" 
--->
 {% extends "main.html" %}
 {% block content %}
   <div class="jumbotron">
     <h1>Welcome to MyADP!</h1>
   </div>
   <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
       <h2>Create your own custom ADP reports</h2>
       <p>Select "Custom" from the dropdown above, and then input the year and league ID of the MFL leagues you want to use to generate your ADP report. Then, you'll be taken to a page with a unique URL that you can bookmark and return to whenever you want, without having to input your league data again.</p>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-6">
       <h2>Filter by name, position, or team</h2>
       <p>Use the search box and dropdowns at the top of each column to view only the players you want to view. You can even find all
       rookies by selecting "FA" from the team filter.</p>
     </div>
-    <div class="col-md-4">
-      <h2>Lock in rows by selecting them</h2>
-      <p>Select one or more rows in the table (using your Control, Shift, and/or Command keys) to prevent them from being hidden by
-      your filters. This is useful if you want to easily compare one or more players to each other or to another set of players.</p>
-    </div>
   </div>
-  <script type="text/javascript">
-    $("#home").addClass('active')
-  </script>
 {% endblock %}
