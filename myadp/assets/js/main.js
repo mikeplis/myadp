@@ -60,14 +60,10 @@ $(document).ready(function() {
       "dom": 'T<"clear">lrtip',
       "columnDefs": [
         {
-          "render": function(data, type, row, meta) {
+          "render": function(data) {
             return data.toFixed(1);
           },
-          "targets": [4, 5]
-        },
-        {
-          "orderable": false,
-          "targets": [1,2,3]
+          "targets": [adpIdx, stdvIdx]
         }
       ],
       "tableTools": {
@@ -80,35 +76,42 @@ $(document).ready(function() {
         $('#overlay').hide();
 
         var api = this.api();
-        api.order([4, 'asc']).draw();
-        $([2, 3]).each(function(_, i) {
-          var column = api.column(i);
-          var select = $('<select><option value=""></option></select>')
-            .appendTo( $(column.header()).empty() )
-            .on('change', function() {
-              var val = $.fn.dataTable.util.escapeRegex(
-                $(this).val() 
-              );
-              column
-                .search( val ? '^'+val+'$' : '', true, false )
-                .draw();
-            });
-          column.data().unique().sort().each( function ( d, j ) {
-              select.append( '<option value="'+d+'">'+d+'</option>' )
+        api.order([adpIdx, 'asc']).draw();
+
+
+        var searchColumn = function(event) {
+          var column = api.column(event.data.idx);
+          var val = $.fn.dataTable.util.escapeRegex(
+            $(this).val() 
+          );
+          column
+            .search( val ? '^'+val+'$' : '', true, false )
+            .draw();
+        }
+
+        var fillSelectOptions = function(id, idx) {
+          var column = api.column(idx);
+          column.data().unique().sort().each(function (d, _) {
+            $("#" + id).append( '<option value="'+d+'">'+d+'</option>' )
           });
-        });
+        }
+
+        fillSelectOptions("positionFilter", posIdx);
+        $("#positionFilter").on('change', {'idx': posIdx}, searchColumn);
+        
+        fillSelectOptions("teamFilter", teamIdx);
+        $("#teamFilter").on('change', {'idx': teamIdx}, searchColumn); 
       }
     });
 
 
     $("#playerFilter").on("keyup change", function() {
-      // TODO: don't hard code Name column index
-      t.column(1).search(this.value).draw();
+      t.column(nameIdx).search(this.value).draw();
     });
 
     // creates Rank column
     t.on('order.dt search.dt', function() {
-      t.column(0, {search:'applied', order:'applied'}).nodes().each(function(cell, i) {
+      t.column(rankIdx, {search:'applied', order:'applied'}).nodes().each(function(cell, i) {
         cell.innerHTML = i+1;
       });
     }).draw();

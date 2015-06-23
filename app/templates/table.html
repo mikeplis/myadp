@@ -1,10 +1,24 @@
 {% extends "main.html" %}
 {% block content %}
-{% if is_editable %}
-<form>
-  <div class="form-group">
-    <label for="playerFilter">Search Players</label>
-    <input id="playerFilter" class="form-control">
+<div id="display-options">
+  <div class="row">
+    <div class="form-group col-sm-4">
+      <label for="playerFilter">Search Players</label>
+      <input id="playerFilter" class="form-control">
+    </div>
+    <!-- https://github.com/davidstutz/bootstrap-multiselect -->
+    <div class="form-group col-sm-4">
+      <label for="positionFilter">Position</label>
+      <select id="positionFilter" class="form-control">
+        <option></option>
+      </select>
+    </div>
+    <div class="form-group col-sm-4">
+      <label for="teamFilter">Team</label>
+      <select id="teamFilter" class="form-control">
+        <option></option>
+      </select>
+    </div>
   </div>
   <div class="row">
   <button class="btn btn-info pull-right csv-export">Export to CSV</button>
@@ -23,13 +37,8 @@
       <th>ADP</th>
       <th>Standard Deviation</th>
       {% for i in num_mocks|get_range %}
-        <th class="league-header"><a href="{{ urls|get_item:i }}">
-          {% if names|get_item:i != '' %} 
-            {{ names|get_item:i }}
-          {% else %}
-            Draft #{{ i }}
-          {% endif %}
-        </a></th>
+        <th class="league-header">
+        <a href="{{ urls|get_item:i }}">{% if names|get_item:i != '' %}{{ names|get_item:i }}{% else %}Draft #{{ i }}{% endif %}</a></th>
       {% endfor %}
     </tr>
   </thead>
