@@ -6,10 +6,14 @@
     <label for="playerFilter">Search Players</label>
     <input id="playerFilter" class="form-control">
   </div>
-  <button class='btn btn-primary pull-right btn-update' type="submit">Edit this report</button>
-</form>
-{% endif %}
-<table id="data" class="table table-condensed display">
+  <div class="row">
+  <button class="btn btn-info pull-right csv-export">Export to CSV</button>
+  {% if is_editable %}
+    <button class='btn btn-primary pull-right btn-update' type="submit">Edit this report</button>
+  {% endif %}
+  </div>
+</div>
+<table id="data" class="table table-condensed table-striped display">
   <thead>
     <tr>
       <th>Rank</th>

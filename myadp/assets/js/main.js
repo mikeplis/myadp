@@ -1,5 +1,43 @@
 $(document).ready(function() {
 
+  // http://stackoverflow.com/questions/4639372/export-to-csv-in-jquery/13814984#13814984
+  jQuery.fn.toCSV = function() {
+    var data = $(this).first(); //Only one table
+    var csvData = [];
+    var tmpArr = [];
+    var tmpStr = '';
+    data.find("tr").each(function() {
+        if($(this).find("th").length) {
+            $(this).find("th").each(function() {
+              tmpStr = $(this).text().replace(/"/g, '""');
+              tmpArr.push('"' + tmpStr + '"');
+            });
+            csvData.push(tmpArr);
+        } else {
+            tmpArr = [];
+               $(this).find("td").each(function() {
+                    if($(this).text().match(/^-{0,1}\d*\.{0,1}\d+$/)) {
+                        tmpArr.push(parseFloat($(this).text()));
+                    } else {
+                        tmpStr = $(this).text().replace(/"/g, '""');
+                        tmpArr.push('"' + tmpStr + '"');
+                    }
+               });
+            csvData.push(tmpArr.join(','));
+        }
+    });
+    var output = csvData.join('\n');
+    var uri = 'data:application/csv;charset=UTF-8,' + encodeURIComponent(output);
+    window.open(uri);
+  }
+
+  var rankIdx = 0;
+  var nameIdx = 1;
+  var posIdx = 2;
+  var teamIdx = 3;
+  var adpIdx = 4;
+  var stdvIdx = 5;
+
   var tableId = '#data'
 
   // necessary here until I figure out how to only load main.js on a page with a table (e.g. not the home page)
@@ -75,7 +113,9 @@ $(document).ready(function() {
       });
     }).draw();
 
-    // TODO: move css out of this file
-    $("#ToolTables_data_0").addClass("btn btn-default pull-right").css("margin-right", "5px");
+    $(".csv-export").click(function() {
+      $("#data").toCSV();
+    });
+    
   }
 });
