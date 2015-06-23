@@ -82,7 +82,7 @@ $(document).ready(function() {
         var searchColumn = function(event) {
           var column = api.column(event.data.idx);
           var val = $.fn.dataTable.util.escapeRegex(
-            $(this).val() 
+            $(this).val();
           );
           column
             .search( val ? '^'+val+'$' : '', true, false )
