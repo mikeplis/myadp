@@ -1,3 +1,3 @@
-# myadp
+# MyADP
 
-http://myadp.herokuapp.com/
+Create custom ADP reports at http://myadp.herokuapp.com/
