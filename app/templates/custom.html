@@ -1,51 +1,47 @@
 {% extends "main.html" %}
 {% block content %}
 <p>Enter the year and ID of the MFL leagues you'd like to use to generate your custom ADP report</p>
-<form id="custom-form" class="form-horizontal" role="form">
+<form id="custom-form" role="form">
   {% if leagues %}
     {% for league in leagues %}
       <div class="form-group entry">
-        <div class="col-md-12">
-            <div class="form-group row">
-                <div class="col-md-2">
-                    <input type="text" class="form-control" id="league-year" placeholder="League Year" value="{{ league.0 }}">
-                </div>
-                <div class="col-md-2">
-                    <input type="text" class="form-control" id="league-id" placeholder="League ID" value="{{ league.1 }}">
-                </div>
-                <div class="col-md-2">
-                    <input type="text" class="form-control" id="league-name" placeholder="Name (optional)" value="{{ league.2 }}">
-                </div>
-                <div class="col-md-2">
-                    <input type="text" class="form-control" id="division-id" placeholder="Division ID (optional)" value="{{ league.3 }}">
-                </div>
-                <button class="btn btn-danger btn-remove" type="button">
-                  <span class="glyphicon glyphicon-minus"></span>
-                </button>
-            </div>
+        <div class="form-group row">
+          <div class="col-sm-2 col-xs-6">
+              <input type="text" class="form-control" id="league-year" placeholder="League Year" value="{{ league.0 }}">
+          </div>
+          <div class="col-sm-2 col-xs-6">
+              <input type="text" class="form-control" id="league-id" placeholder="League ID" value="{{ league.1 }}">
+          </div>
+          <div class="col-sm-2 col-xs-6">
+              <input type="text" class="form-control" id="league-name" placeholder="Label (optional)" value="{{ league.2 }}">
+          </div>
+          <div class="col-sm-2 col-xs-6">
+              <input type="text" class="form-control" id="division-id" placeholder="Division ID (optional)" value="{{ league.3 }}">
+          </div>
+          <button class="btn btn-danger btn-remove pull-left" type="button">
+            <span class="glyphicon glyphicon-minus"></span>
+          </button>
         </div>
       </div>
     {% endfor %}
   {% else %}
   <div class="form-group entry">
-    <div class="col-md-12">
-        <div class="form-group row">
-            <div class="col-md-2">
-                <input type="text" class="form-control" id="league-year" placeholder="League Year">
-            </div>
-            <div class="col-md-2">
-                <input type="text" class="form-control" id="league-id" placeholder="League ID">
-            </div>
-            <div class="col-md-2">
-                <input type="text" class="form-control" id="league-name" placeholder="Name (optional)">
-            </div>
-            <div class="col-md-2">
-                <input type="text" class="form-control" id="division-id" placeholder="Division ID (optional)">
-            </div>
-            <button class="btn btn-success btn-add" type="button">
-              <span class="glyphicon glyphicon-plus"></span>
-            </button>
+    <div class="form-group row">
+        <div class="col-sm-2 col-xs-6">
+            <input type="text" class="form-control" id="league-year" placeholder="League Year">
         </div>
+        <div class="col-sm-2 col-xs-6">
+            <input type="text" class="form-control" id="league-id" placeholder="League ID">
+        </div>
+        <div class="col-sm-2 col-xs-6">
+            <input type="text" class="form-control" id="league-name" placeholder="Label (optional)">
+        </div>
+        <div class="col-sm-2 col-xs-6">
+            <input type="text" class="form-control" id="division-id" placeholder="Division ID (optional)">
+        </div>
+        <button class="btn btn-success btn-add pull-left" type="button">
+          <span class="glyphicon glyphicon-plus"></span>
+        </button>
     </div>
   </div>
   {% endif %}
