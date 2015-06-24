@@ -1,7 +1,7 @@
 .selected {
   background-color: #b0bed9;
 }
-body {
+.container {
   padding-top: 20px;
   padding-bottom: 20px;
 }

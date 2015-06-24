@@ -1,17 +1,19 @@
 {% extends "main.html" %}
-{% block content %}
-  <div class="jumbotron">
-    <h1>Welcome to MyADP!</h1>
-  </div>
-  <div class="row">
-    <div class="col-md-6">
-      <h2>Create your own custom ADP reports</h2>
-      <p>Select "Custom" from the dropdown above, and then input the year and league ID of the MFL leagues you want to use to generate your ADP report. Then, you'll be taken to a page with a unique URL that you can bookmark and return to whenever you want, without having to input your league data again.</p>
+{% block navbar %}{% endblock %}
+{% block container %}
+<link rel="stylesheet" type="text/css" href="/static/css/index.css">
+<div class="site-wrapper">
+  <div class="site-wrapper-inner">
+    <div class="cover-container">
+      <div class="inner cover">
+        <h1 class="cover-heading">MyADP</h1>
+        <p class="lead">Create average draft position reports tailored to your MFL leagues</p>
+        <p class="lead">
+          <a href="/custom" class="btn btn-lg btn-primary">Get started</a>
+          <a href="/report/sample" class="btn btn-lg btn-default">See example</a>
+        </p>
+      </div>
     </div>
-    <div class="col-md-6">
-      <h2>Filter by name, position, or team</h2>
-      <p>Use the search box and dropdowns at the top of each column to view only the players you want to view. You can even find all
-      rookies by selecting "FA" from the team filter.</p>
-    </div>
   </div>
+</div>
 {% endblock %}
