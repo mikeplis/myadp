@@ -6,19 +6,25 @@ from django.shortcuts import render, redirect
 from django.template.defaulttags import register
 from django.templatetags.static import static
 from django.utils.safestring import mark_safe
-from django.views.decorators.clickjacking import xframe_options_exempt
-import logging
+from django.views.decorators.clickjacking import xframe_options_exempt  
 import csv
 import json
 import logging
+import logging
 import numpy
+import os
 import os.path
+import redis as rdis
 import sys
+import time
 import urllib
 import urllib2
 import warnings
 
 logger = logging.getLogger('testlogger')
+redis = rdis.utils.from_url(os.environ['REDIS_URL'])
+redis_timeout = float(os.environ['REDIS_TIMEOUT']) * 60 # minutes * seconds/minute
+cache_whitelist = map(int, os.environ['CACHE_WHITELIST'].split(','))
 
 @register.filter
 def get_item(_list, key):
@@ -107,6 +113,7 @@ class MFLSource(DataSource):
   def __init__(self, year, league_id, division_id):
     self.year = year
     self.league_id = league_id
+    self.division_id = division_id
     self.url = 'http://football.myfantasyleague.com/{}/options?L={}&O=17&DISPLAY=DIVISION{}'.format(year, league_id, division_id)
 
   # TODO: why does this function need `source` passed in?
@@ -140,12 +147,30 @@ class LiveMFLSource(MFLSource):
     MFLSource.__init__(self, year, league_id, division_id)
 
   def __str__(self):
-    return 'LiveMFLSource(year={}, league_id={})'.format(self.year, self.league_id)
+    return 'LiveMFLSource(year={}, league_id={}, division_id={})'.format(self.year, self.league_id, self.division_id)
 
   def get_picks(self):
-    page = urllib2.urlopen(self.url).read()
+    time_key = '_'.join([str(self.year), str(self.league_id), str(self.division_id), 'time'])
+    page_key = '_'.join([str(self.year), str(self.league_id), str(self.division_id), 'page'])
+    if self.league_id in cache_whitelist:
+      current_time = int(time.time())
+      maybe_league_time = redis.get(time_key)
+      if maybe_league_time is not None:
+        league_time = int(redis.get(time_key))
+      else:
+        league_time = 0
+      if current_time - league_time > redis_timeout:
+        logger.info('resetting cache for {} at time {}'.format(time_key, current_time))
+        page = urllib2.urlopen(self.url).read()
+        redis.set(page_key, page)
+        redis.set(time_key, current_time)
+      else:
+        logger.info('using cache for league_id {}, year {}, division {}'.format(self.league_id, self.year, self.division_id))
+        page = redis.get(page_key)
+    else:
+      logger.info('no cache for {}'.format(time_key))
+      page = urllib2.urlopen(self.url).read()
     return MFLSource.get_picks(self, page)
-
 
 def create_table_context(sources, names=None):
   api_data = {
@@ -170,9 +195,11 @@ def parse_data_from_request(request):
   division_ids = ['00'] * len(league_ids)
   for i, div_id in enumerate(request.GET.getlist('divisionIds[]')):
     division_ids[i] = div_id.zfill(2)
+  # TODO: make this return an object instead of a tuple
   return (years, league_ids, names, division_ids)
 
 request_for_feedback = mark_safe('Click <a href="/contact">here</a> if you have any feedback. I\'d love to hear how I can make the site better.')
+
 def index(request):
   #messages.add_message(request, messages.INFO, request_for_feedback)
   return render(request, 'index.html')
@@ -247,6 +274,8 @@ def nasty26(request):
 # TODO: http://docs.themoviedb.apiary.io/#
 @xframe_options_exempt
 def scottfish(request, conference_name):
+  messages.add_message(request, messages.INFO, "Results displayed may be behind by up {} minutes".format(os.environ['REDIS_TIMEOUT']))
+  # NOTE: if any of the scottfish league id's change, they must also be updated in CACHE_WHITELIST
   conferences = {
     'zoolander': {
       'names': ['Blue Steel', 'Magnum', 'Hansel', 'Mugatu', 'Maury Ballstein'],
@@ -286,6 +315,7 @@ def scottfish(request, conference_name):
     ]
     context = create_table_context(sources, data['names'])
     return render(request, 'scottfish.html', context)
+  # produces data for all scottfish leagues
   else:
     league_ids = []
     names = []
