@@ -10,7 +10,6 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 import csv
 import json
 import logging
-import logging
 import numpy
 import os
 import os.path
