@@ -1,3 +1,4 @@
+import itertools
 import logging
 import os
 import redis as _redis
@@ -6,23 +7,26 @@ import urllib2
 # TODO: fix duplicate code 
 
 logger = logging.getLogger('testlogger')
-print(os.environ)
-# redis = _redis.utils.from_url(os.environ['REDIS_URL'])
+redis = _redis.StrictRedis.from_url(os.environ['REDIS_URL'])
+redis_timeout = int(os.environ['REDIS_TIMEOUT']) * 60 # minutes * seconds/minute
 
-# def download_draft(year, league_id, division_id):
-#   url = 'http://football.myfantasyleague.com/{}/options?L={}&O=17&DISPLAY=DIVISION{}'.format(year, league_id, division_id)
-#   page = urllib2.urlopen(url).read()
+logger.info('caching scottfish leagues')
 
-#   key = '_'.join([str(year), str(league_id), str(division_id)])
+def download_draft(year, league_id, division_id):
+  url = 'http://football.myfantasyleague.com/{}/options?L={}&O=17&DISPLAY=DIVISION{}'.format(year, league_id, division_id)
+  page = urllib2.urlopen(url).read()
 
-#   #redis.set(key, page)
-#   logger.info(key)
-#   logger.info(page)
+  key = '_'.join([str(year), str(league_id), str(division_id)])
 
-# years = [2015]
-# league_ids = [63005, 75504, 56539, 57897, 66231, 59129]
-# division_ids = ['00', '01', '02', '03', '04']
+  logger.info('setting cache for {}'.format(key))
 
-# for (year, league_id, division_id) in zip(years, league_ids, division_ids):
-#   download_draft(year, league_id, division_id) 
+  # using setex so app doesn't get stuck using stale results
+  redis.setex(key, redis_timeout, page)
+
+years = [2015]
+league_ids = map(int, os.environ['CACHE_WHITELIST'].split(','))
+division_ids = ['00', '01', '02', '03', '04']
+
+for (year, league_id, division_id) in itertools.product(years, league_ids, division_ids):
+  download_draft(year, league_id, division_id) 
 
