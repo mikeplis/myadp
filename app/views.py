@@ -13,7 +13,7 @@ import logging
 import numpy
 import os
 import os.path
-import redis as rdis
+import redis as _redis
 import sys
 import time
 import urllib
@@ -21,9 +21,8 @@ import urllib2
 import warnings
 
 logger = logging.getLogger('testlogger')
-redis = rdis.utils.from_url(os.environ['REDIS_URL'])
-redis_timeout = float(os.environ['REDIS_TIMEOUT']) * 60 # minutes * seconds/minute
-cache_whitelist = map(int, os.environ['CACHE_WHITELIST'].split(','))
+redis = _redis.StrictRedis.from_url(os.environ['REDIS_URL'])
+redis_timeout = int(os.environ['REDIS_TIMEOUT']) * 60 # minutes * seconds/minute
 
 @register.filter
 def get_item(_list, key):
@@ -149,26 +148,15 @@ class LiveMFLSource(MFLSource):
     return 'LiveMFLSource(year={}, league_id={}, division_id={})'.format(self.year, self.league_id, self.division_id)
 
   def get_picks(self):
-    time_key = '_'.join([str(self.year), str(self.league_id), str(self.division_id), 'time'])
-    page_key = '_'.join([str(self.year), str(self.league_id), str(self.division_id), 'page'])
-    if self.league_id in cache_whitelist:
-      current_time = int(time.time())
-      maybe_league_time = redis.get(time_key)
-      if maybe_league_time is not None:
-        league_time = int(redis.get(time_key))
-      else:
-        league_time = 0
-      if current_time - league_time > redis_timeout:
-        logger.info('resetting cache for {} at time {}'.format(time_key, current_time))
-        page = urllib2.urlopen(self.url).read()
-        redis.set(page_key, page)
-        redis.set(time_key, current_time)
-      else:
-        logger.info('using cache for league_id {}, year {}, division {}'.format(self.league_id, self.year, self.division_id))
-        page = redis.get(page_key)
+    redis_key = '_'.join([str(self.year), str(self.league_id), str(self.division_id)])
+    logger.info(redis.exists(redis_key))
+    if redis.exists(redis_key):
+      logger.info('using cache for {}'.format(redis_key))
+      page = redis.get(redis_key)
     else:
-      logger.info('no cache for {}'.format(time_key))
+      logger.info('no cache for {}'.format(redis_key))
       page = urllib2.urlopen(self.url).read()
+      #redis.setex(redis_key, redis_timeout, page)
     return MFLSource.get_picks(self, page)
 
 def create_table_context(sources, names=None):
