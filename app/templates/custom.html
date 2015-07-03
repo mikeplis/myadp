@@ -1,6 +1,12 @@
 {% extends "main.html" %}
 {% block content %}
-<p>Enter the year and ID of the MFL leagues you'd like to use to generate your custom ADP report</p>
+<p>Enter the year and ID of the MFL leagues you'd like to use to generate your custom ADP report.</p>
+<p><u>To find a division ID in MFL, follow these steps:</u></p>
+<ol>
+  <li>Go to Reports > League > Draft</li>
+  <li>Above the table, next to "Show Draft For", click on the division you want the ID for</li>
+  <li>Look in the URL of the page for something like "DISPLAY=DIVISION01". The two digit number next to "DIVISION" is the division ID. If no ID is displayed in the URL, the division ID is 00. <strong>You must input the division ID as a two digit number.</strong></li>
+</ol>
 <form id="custom-form" role="form">
   {% if leagues %}
     {% for league in leagues %}
