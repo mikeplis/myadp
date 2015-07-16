@@ -13,6 +13,7 @@ import logging
 import numpy
 import os
 import os.path
+import re
 import redis as _redis
 import sys
 import time
@@ -117,15 +118,15 @@ class MFLSource(DataSource):
   # TODO: why does this function need `source` passed in?
   def get_picks(self, source):
     picks = []
-    soup = BeautifulSoup(source)
-    rows = soup.find('table', {'class': 'report'}).find_all('tr')[1:]
-    is_draft_finished = True
-    for row in rows:
-      player_data = row.find('td', {'class': 'player'})
-      if player_data is None:
-        is_draft_finished = False
-        break
-      player_name_node = player_data.find('a')
+    # hack to deal with people who think they're clever by putting html in their franchise name
+    source = re.sub(r'(?i)<td class="franchisename">.*</td>', '', source) 
+    soup = BeautifulSoup(source, "html.parser")
+    num_total_picks = len(soup.find('table', {'class': 'report'}).find_all('tr', {'class': ['oddtablerow', 'eventablerow']}))
+    players = soup.find_all('td', {'class': 'player'})
+    is_draft_finished = False if len(players) < num_total_picks else True
+    for player in players:
+      #player_data = row.find('td', {'class': 'player'})
+      player_name_node = player.find('a')
       if player_name_node is not None:
         player = player_name_node.text.rsplit(' ', 2)
       else:
